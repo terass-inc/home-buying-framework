@@ -1,0 +1,65 @@
+# 数値前提（AIが計算・比較に使うデフォルト値）
+# 出典: 『住宅購入の思考法』（江口亮介, 2024）のシミュレーション前提を基に、2026年時点で見直したもの。
+# 「見直し要」の項目は、回答時に最新値を利用者に確認するか、Web検索で更新すること。
+updated_at: 2026-09-10
+
+interest_rate:
+  simulation_default_pct: 1.0        # 比較シミュレーションで使う標準金利（年率）。本書の前提を踏襲
+  note: "変動・固定の実勢金利は2024年以降上昇している。回答時は最新値を確認すること（見直し要）"
+  screening_rate_pct: 3.0            # 審査金利。銀行が返済比率を計算するときに用いる仮の金利（3〜4%が一般的）
+  screening_rate_note: "見直し要。銀行ごとに異なる"
+
+loan:
+  default_term_years: 35             # 期間は原則最長で組む。短縮は繰上返済で後から実現できる
+  repayment_ratio_limit_pct: 35      # 返済比率の上限（年収400万円以上の一般的な審査基準）。借りるべき額ではない
+  income_multiple_lendable: "7〜8倍（最大9〜10倍）"   # 借りられる額の目安。借りるべき額ではない
+  income_multiple_caution: "考えなしに年収7〜8倍を組むと将来苦しくなる水準として本書は扱う"
+  pair_loan_ratio_recommended: "7:3 または 8:2"         # 限度額いっぱいの5:5は避ける
+  origination_fee_pct: 2.2           # ローン事務手数料（借入額に対する定率型の一般値、税込）
+  low_fee_type_rate_premium_pct: 0.25  # 定額型（低初期費用）は金利が約0.25%上乗せ。10年以内売却なら定額型が有利
+
+purchase_costs:
+  new_condo_pct: 4.5                 # 新築マンションの諸費用（4〜5%）
+  used_or_house_pct: 7.5             # 新築戸建て・中古マンション・中古戸建て（7〜8%）
+  simulation_default_pct: 7.0
+  earnest_money_pct: 5.0             # 手付金の目安
+
+depreciation:                        # 市況変化なしの前提での物件価格下落率
+  condo_pct_per_year: 1.5            # RC造47年・建物7割（首都圏）から算出
+  house_pct_per_year: 1.4            # 木造22年・建物3割（首都圏）から算出
+  basis:
+    condo_land_ratio: 0.3
+    house_land_ratio: 0.7
+    rc_useful_life_years: 47
+    wood_useful_life_years: 22
+
+ownership_costs:
+  condo_fixed_costs_yen_per_year: 350000   # 管理費＋修繕積立金＋固定資産税（5000万円中古マンションの例）
+  management_fee_growth_pct_per_year: 2.0  # 管理費・修繕積立金の上昇見込み（本書に明示なし。打ち合わせで追加。要調整）
+  renovation_yen_per_10years: 1000000      # 10年に1度100万円
+
+rent:
+  renewal_fee_months: 1              # 2年（24カ月）ごとに賃料1カ月分
+  renewal_interval_months: 24
+  initial_cost_months: 3.5           # 敷金・礼金・仲介料など賃料3〜4カ月分
+  moving_cost_yen: 300000            # 引っ越し1回あたり（本書に明示なし。打ち合わせで追加。要調整）
+  moving_interval_years: 6           # 賃貸継続時の引っ越し頻度の仮定（要調整）
+  rent_growth_pct_per_year: 1.0      # 賃料上昇の見込み（本書に明示なし。打ち合わせで追加。要調整）
+
+holding:
+  minimum_years_to_buy: 5            # 諸費用7%を回収できないため、5年未満で手放す見込みなら購入を勧めない
+  wait_breakeven_drop_pct_per_year: 3.6   # 家賃180万円/年÷5000万円。待って得するには年5%以上の下落が必要
+  historical_max_drop_pct: 6.3       # 首都圏中古マンション、リーマンショック時（2008年5月→2009年4月）
+
+tax_and_programs:
+  mortgage_deduction: "制度は年度ごとに変わる（見直し要）。2024年時点: 中古10年・最大140万円、新築省エネ子育て世帯13年・最大455万円"
+  mortgage_deduction_min_area_sqm: 50
+  gift_tax_exemption: "住宅取得資金の直系尊属からの贈与非課税枠は縮小傾向（見直し要）"
+
+space:
+  child_additional_sqm: "10〜15㎡/人"
+  urban_guideline: "都市居住型: 単身40㎡、2人以上は 20㎡×世帯人数＋15㎡（10歳未満の子は0.25〜0.75人換算）"
+  general_guideline: "一般型: 単身55㎡、2人以上は 25㎡×世帯人数＋25㎡"
+
+seismic:
+  old_standard_cutoff: "1981年5月31日以前に建築確認 → 旧耐震（住宅ローン控除対象外・担保評価が低くなりやすい）"

@@ -1,0 +1,4 @@
+# 書籍本文とその抽出メモは版権の都合で公開しない（ローカル作業用）
+.sources/
+.DS_Store
+node_modules/
