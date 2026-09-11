@@ -14,6 +14,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 LIMIT = 4500
 
+# 本書第6章「理想の家を見つける4つのステップ」の順に話題を束ねる
+STEPS = [
+    ("ステップ1 住む年数と購入コンセプト", ["00", "01", "04"]),
+    ("ステップ2 資金計画", ["03", "02", "05"]),
+    ("ステップ3 条件整理", ["06", "07", "08"]),
+    ("ステップ4 物件見学", ["09"]),
+]
+
 LITE_ASSUMPTIONS = [
     ("interest_rate", "simulation_default_pct", "比較シミュレーションの標準金利（実勢金利は必ず最新値を確認。見直し要）", "%"),
     ("purchase_costs", "simulation_default_pct", "購入諸費用（物件価格に対する率）", "%"),
@@ -78,13 +86,14 @@ def main() -> None:
         "",
         agents_core(),
         "",
-        "## 話題別の要点",
+        "## 話題別の要点（本書の4ステップ順）",
     ]
-    for p in sorted((ROOT / "principles").glob("[0-9][0-9]-*.md")):
-        if p.name.startswith("99-"):
-            continue  # 対応しないことは上の区間で既に書いている
-        parts.append(principle_digest(p))
-        parts.append("")
+    files = {p.name[:2]: p for p in (ROOT / "principles").glob("[0-9][0-9]-*.md")}
+    for step, ids in STEPS:
+        parts.append(f"### {step}")
+        for i in ids:
+            parts.append(principle_digest(files[i]))
+            parts.append("")
     parts.append("## " + assumptions_digest())
     parts.append("")
     parts.append("最終判断は不動産エージェントや独立系ファイナンシャルプランナーなど専門家と行ってください。")
