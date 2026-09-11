@@ -16,7 +16,7 @@ loan:
   income_multiple_caution: "考えなしに年収7〜8倍を組むと将来苦しくなる水準として本書は扱う"
   pair_loan_ratio_recommended: "7:3 または 8:2"         # 限度額いっぱいの5:5は避ける
   origination_fee_pct: 2.2           # ローン事務手数料（借入額に対する定率型の一般値、税込）
-  low_fee_type_rate_premium_pct: 0.25  # 定額型（低初期費用）は金利が約0.25%上乗せ。10年以内売却なら定額型が有利
+  low_fee_type_rate_premium_pct: 0.25  # 定額型（低初期費用）は金利が約0.25%上乗せ。約7年未満で売却なら定額型が有利（第6章。第3章は10年。要試算）
 
 purchase_costs:
   new_condo_pct: 4.5                 # 新築マンションの諸費用（4〜5%）

@@ -19,7 +19,7 @@ LITE_ASSUMPTIONS = [
     ("depreciation", "condo_pct_per_year", "マンション価格の年間下落率（市況変化なし）", "%"),
     ("depreciation", "house_pct_per_year", "戸建て価格の年間下落率（市況変化なし）", "%"),
     ("holding", "minimum_years_to_buy", "購入を勧める最低居住年数", "年"),
-    ("holding", "wait_breakeven_drop_pct_per_year", "1年待って得をするのに必要な下落率", "%"),
+    ("holding", "wait_breakeven_drop_pct_per_year", "1年待つ場合の損益分岐となる下落率（得をするには5%以上が必要、本書第3章）", "%"),
     ("holding", "historical_max_drop_pct", "首都圏中古マンションの過去最大下落（リーマンショック時）", "%"),
     ("loan", "default_term_years", "ローン期間の原則", "年"),
     ("loan", "income_multiple_lendable", "借りられる額の目安（年収倍率）", ""),
@@ -70,7 +70,7 @@ def main() -> None:
     parts = [
         "# 住宅購入をAIに相談する前に読み込ませる前提（ライト版）",
         "この文章を貼り付けたあとに、相談したいことを書いてください。AIはこの前提を会話全体に適用します。",
-        "出典: 江口亮介『住宅購入の思考法』（2024）のエッセンス。完全版: https://github.com/terass-inc/home-buying-framework",
+        "出典: 江口亮介『住宅購入の思考法』（2024）のエッセンスと、TERASS による追加論点。完全版: https://github.com/terass-inc/home-buying-framework",
         "",
         agents_core(),
         "",
