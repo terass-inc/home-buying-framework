@@ -15,7 +15,10 @@ ROOT = Path(__file__).resolve().parent.parent
 LIMIT = 4500
 
 LITE_ASSUMPTIONS = [
+    ("interest_rate", "simulation_default_pct", "比較シミュレーションの標準金利（実勢金利は必ず最新値を確認。見直し要）", "%"),
     ("purchase_costs", "simulation_default_pct", "購入諸費用（物件価格に対する率）", "%"),
+    ("ownership_costs", "repair_reserve_growth_pct_per_year", "修繕積立金の上昇率（年）", "%"),
+    ("rent", "initial_cost_months", "賃貸の住み替え時の初期費用（賃料の月数）", "カ月分"),
     ("depreciation", "condo_pct_per_year", "マンション価格の年間下落率（市況変化なし）", "%"),
     ("depreciation", "house_pct_per_year", "戸建て価格の年間下落率（市況変化なし）", "%"),
     ("holding", "minimum_years_to_buy", "購入を勧める最低居住年数", "年"),
@@ -70,6 +73,7 @@ def main() -> None:
     parts = [
         "# 住宅購入をAIに相談する前に読み込ませる前提（ライト版）",
         "この文章を貼り付けたあとに、相談したいことを書いてください。AIはこの前提を会話全体に適用します。",
+        "AIへ: この文章だけが送られ相談内容がまだ無いときは、要約や復唱をせず、次の1文だけ返してください。「前提を読み込みました。まず、その家に何年くらい住む予定ですか？（未定なら『未定』で大丈夫です）」相談内容が一緒に書かれていれば、そのまま答えてください。",
         "出典: 江口亮介『住宅購入の思考法』（2024）のエッセンスと、TERASS による追加論点。完全版: https://github.com/terass-inc/home-buying-framework",
         "",
         agents_core(),
@@ -83,7 +87,7 @@ def main() -> None:
         parts.append("")
     parts.append("## " + assumptions_digest())
     parts.append("")
-    parts.append("最終判断は不動産エージェントや独立系ファイナンシャルプランナーなど専門家と行ってください。この前提は不動産仲介会社 TERASS が作成しており、私たちにもポジションがあります。")
+    parts.append("最終判断は不動産エージェントや独立系ファイナンシャルプランナーなど専門家と行ってください。")
     out = "\n".join(parts).rstrip() + "\n"
     (ROOT / "dist").mkdir(exist_ok=True)
     (ROOT / "dist" / "lite.md").write_text(out, encoding="utf-8")

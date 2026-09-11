@@ -6,13 +6,15 @@ ChatGPT や Claude に住宅購入の相談をする前に、これを読み込�
 
 書籍『住宅購入の思考法』（江口亮介 著、2024年）のエッセンスと、年間約4,000件の不動産取引を支援する TERASS の知見を、AIが読める形に整理しました。
 
-## 使い方
+## 使い方（スマホで3ステップ）
 
-### 1. スマホのChatGPT（無料版）で使う
+1. [この文章](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/dist/lite.md) を開いて、全文をコピーする（約3,000字）
+2. ChatGPT や Claude の入力欄に貼り付けて送信する
+3. AIが「何年くらい住む予定ですか？」と聞いてきたら、そこから相談を始める
 
-`dist/lite.md` の中身をコピーして、会話の最初に貼り付けてください。その後に相談したいことを書きます。約4,000字です。
+これだけで、AIはこの前提を会話全体に適用します。
 
-### 2. Claude・ChatGPT（有料版）・その他AIで使う
+### もう少し詳しく使う（Claude・ChatGPT有料版など、URLを読めるAI）
 
 会話の最初に次のように書きます。
 
@@ -21,7 +23,7 @@ https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/AGENTS.m
 このURLの内容を読み、その前提で住宅購入の相談に答えてください。
 ```
 
-### 3. Claude Code・Cursor などで使う
+### 開発者向け（Claude Code・Cursor など）
 
 このリポジトリをクローンすると `CLAUDE.md` と `AGENTS.md` が自動で読み込まれます。
 
@@ -34,7 +36,7 @@ https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/AGENTS.m
 | `assumptions.yaml` | 計算に使う数値前提（金利、諸費用率、下落率、更新料など）と更新日 |
 | `calc/` | 賃貸か購入かの比較計算と住宅購入バランスシートの手順。本書の購入者付録Excel（`calc/住宅購入バランスシート.xlsx`）を同梱 |
 | `cases/` | テストケース。質問と、期待する回答の要点、NG判定 |
-| `dist/lite.md` | 上記を約4,000字に圧縮したコピペ用ファイル。`scripts/build_lite.py` で生成 |
+| `dist/lite.md` | 上記を約3,000字に圧縮したコピペ用ファイル。`scripts/build_lite.py` で生成 |
 
 ## なぜ作ったか
 
