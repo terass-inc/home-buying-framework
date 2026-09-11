@@ -13,10 +13,10 @@
 ## 判断手順
 
 1. **比較の型を固定する。** 計算は `calc/rent-vs-buy.md` の手順に従う。ここで守る前提は次の4つ。
-   - 累計支払額ではなく、購入側は「支払総額 − 売却後の手残り（売却価格 − 残債 − 売却諸費用）」で比べる。
+   - 累計支払額ではなく、購入側は「累計キャッシュアウト − 売却後の手残り（売却時の物件価値 − 残債）」で比べる（`calc/rent-vs-buy.md`）。売却諸費用は本書付録Excelに含まれない追加論点なので、入れるときはそう明示する。
    - 同じ居住年数 N 年で比べる。35年完済前提の比較は現実の住み替え行動と合わない。
-   - 両側の値上がりを入れる。購入側は管理費・修繕積立金の上昇 2%/年（`ownership_costs.management_fee_growth_pct_per_year`）と10年ごとのリフォーム 100万円（`ownership_costs.renovation_yen_per_10years`）。賃貸側は賃料上昇 1%/年（`rent.rent_growth_pct_per_year`）、24カ月ごとに賃料1カ月分の更新料（`rent.renewal_fee_months`、`rent.renewal_interval_months`）、6年ごとの引っ越し 30万円（`rent.moving_cost_yen`、`rent.moving_interval_years`）と、そのたびの初期費用 賃料3.5カ月分（`rent.initial_cost_months`）。片側だけ入れるのはポジショントークになる。
-   - 市況は予測しない。「市況変化なし＋経年減価（マンション 1.5%/年 `depreciation.condo_pct_per_year`、戸建て 1.4%/年 `depreciation.house_pct_per_year`）」を標準ケースにし、金利 +1%、下落率 ×2、賃料上昇なし、のいずれかを感度分析として添える。
+   - 両側の値上がりを入れる。購入側は修繕積立金の上昇 3%/年（`ownership_costs.repair_reserve_growth_pct_per_year`）と10年ごとのリフォーム 100万円（`ownership_costs.renovation_yen_per_10years`）。賃貸側は24カ月ごとに賃料1カ月分の更新料（`rent.renewal_fee_months`、`rent.renewal_interval_months`）と、住み替えのたびの初期費用 賃料4.5カ月分（`rent.initial_cost_months`）。住み替えの時期と賃料は利用者に聞き、なければ本書付録Excelの例（5年後に18万円、20年後に14万円、`rent.example_moves`）を使う。片側だけ入れるのはポジショントークになる。
+   - 市況は予測しない。「市況変化なし＋経年減価」を標準ケースにし、下落率は本書付録Excelどおり 小1%・中1.5%・大4%（`depreciation.scenarios`）の3シナリオを必ず並べる。戸建ては 1.4%/年（`depreciation.house_pct_per_year`）。
 2. **「買うべき人の3条件」に当てはめる（第2章）。** ①好条件で住宅ローンを組める、②資産性の高い物件を買う、③5年以上住む見通しがある（`holding.minimum_years_to_buy`）。3つが揃えば購入が有利になりやすく、欠けるほど賃貸が安全になる。5年未満で手放す可能性が高いなら、諸費用 7%（`purchase_costs.simulation_default_pct`）を回収できず賃貸が有利になりやすい、と必ず注記する。
 3. **賃貸向きの条件も同じ重さで示す（第2章）。** ローンを有利に借りられない、人口が減るエリアに住む、5年未満で住み替える可能性がある、会社の家賃補助が手厚い、家賃を経費・会社負担にできる。ひとつでも当てはまれば「賃貸を続ける」を正面から選択肢に置く。
 4. **「安くなるまで待つ」が出たら、待つコストを数字で示す（第3章）。** 待っている間の家賃は掛け捨てで、年間180万円の家賃なら5000万円の物件が年 3.6%（`holding.wait_breakeven_drop_pct_per_year`）下がってようやく同等、得をするには年5%以上の下落が必要。首都圏中古マンションの過去の下落局面はリーマンショック時の 6.3%（`holding.historical_max_drop_pct`、2008年5月→2009年4月）が最大で、同程度の期間で価格は戻っている。加えて、待つ間に健康状態が変わればローン条件そのものが悪化する。

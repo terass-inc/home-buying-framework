@@ -10,7 +10,7 @@ interest_rate:
   screening_rate_note: "見直し要。銀行ごとに異なる"
 
 loan:
-  default_term_years: 35             # 期間は原則最長で組む。短縮は繰上返済で後から実現できる
+  default_term_years: 35             # 通常35年、最長50年。80歳までの完済が通常（本書付録Excel）。短縮は繰上返済で後から実現できる（本書外の追加論点）
   repayment_ratio_limit_pct: 35      # 返済比率の上限（年収400万円以上の一般的な審査基準）。借りるべき額ではない
   income_multiple_lendable: "7〜8倍（最大9〜10倍）"   # 借りられる額の目安。借りるべき額ではない
   income_multiple_caution: "考えなしに年収7〜8倍を組むと将来苦しくなる水準として本書は扱う"
@@ -25,26 +25,33 @@ purchase_costs:
   earnest_money_pct: 5.0             # 手付金の目安
 
 depreciation:                        # 市況変化なしの前提での物件価格下落率
-  condo_pct_per_year: 1.5            # RC造47年・建物7割（首都圏）から算出
+  condo_pct_per_year: 1.5            # RC造47年・建物7割（首都圏）から算出。Excelの「中」シナリオ
   house_pct_per_year: 1.4            # 木造22年・建物3割（首都圏）から算出
+  scenarios:                         # 本書付録Excelの3シナリオ。必ず3つ並べて示す
+    small_pct_per_year: 1.0
+    medium_pct_per_year: 1.5
+    large_pct_per_year: 4.0
   basis:
     condo_land_ratio: 0.3
     house_land_ratio: 0.7
     rc_useful_life_years: 47
     wood_useful_life_years: 22
 
-ownership_costs:
-  condo_fixed_costs_yen_per_year: 350000   # 管理費＋修繕積立金＋固定資産税（5000万円中古マンションの例）
-  management_fee_growth_pct_per_year: 2.0  # 管理費・修繕積立金の上昇見込み（本書に明示なし。打ち合わせで追加。要調整）
-  renovation_yen_per_10years: 1000000      # 10年に1度100万円
+ownership_costs:                     # 本書付録Excel「2) 購入vs賃貸シミュレーション」の初期値
+  condo_management_fee_yen_per_month: 14000   # 管理費（月）。5000万円の都市部ファミリーマンションの例
+  condo_repair_reserve_yen_per_month: 14000   # 修繕積立金（月）
+  repair_reserve_growth_pct_per_year: 3.0     # 修繕積立金の上昇率。築年が進むと積立額が増える前提（Excel初期値）
+  property_tax_yen_per_year: 120000           # 固定資産税。都市部のファミリーマンションで年10〜20万円
+  condo_fixed_costs_yen_per_year: 350000      # 上記を合算した簡略値（本書「はじめに」のシミュレーションでは固定）
+  renovation_yen_per_10years: 1000000         # 10年に1度100万円
 
-rent:
+rent:                                # 本書付録Excelの賃貸モデル。賃料の上昇率ではなく「住み替え」で賃料が変わる
   renewal_fee_months: 1              # 2年（24カ月）ごとに賃料1カ月分
   renewal_interval_months: 24
-  initial_cost_months: 3.5           # 敷金・礼金・仲介料など賃料3〜4カ月分
-  moving_cost_yen: 300000            # 引っ越し1回あたり（本書に明示なし。打ち合わせで追加。要調整）
-  moving_interval_years: 6           # 賃貸継続時の引っ越し頻度の仮定（要調整）
-  rent_growth_pct_per_year: 1.0      # 賃料上昇の見込み（本書に明示なし。打ち合わせで追加。要調整）
+  initial_cost_months: 4.5           # 住み替え時の初期費用（敷金・礼金・仲介手数料など）。賃料の4〜5カ月分
+  example_moves:                     # Excel初期値の住み替え例。利用者の予定で上書きする
+    - {after_years: 5, rent_yen_per_month: 180000}    # 家族が増えて広くする
+    - {after_years: 20, rent_yen_per_month: 140000}   # 子供が独立して小さくする
 
 holding:
   minimum_years_to_buy: 5            # 諸費用7%を回収できないため、5年未満で手放す見込みなら購入を勧めない

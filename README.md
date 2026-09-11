@@ -32,7 +32,7 @@ https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/AGENTS.m
 | `AGENTS.md` | AIへの指示書。絶対に守る5つのルール、回答前の確認事項、対応しないこと |
 | `principles/` | 話題別の原則。出口戦略、ローン期間、予算、賃貸か購入か、団信と諸費用、資産性、マンションか戸建てか、新築か中古か、進め方 |
 | `assumptions.yaml` | 計算に使う数値前提（金利、諸費用率、下落率、更新料など）と更新日 |
-| `calc/` | 賃貸か購入かの比較計算の手順 |
+| `calc/` | 賃貸か購入かの比較計算と住宅購入バランスシートの手順。本書の購入者付録Excel（`calc/住宅購入バランスシート.xlsx`）を同梱 |
 | `cases/` | テストケース。質問と、期待する回答の要点、NG判定 |
 | `dist/lite.md` | 上記を約4,000字に圧縮したコピペ用ファイル。`scripts/build_lite.py` で生成 |
 
