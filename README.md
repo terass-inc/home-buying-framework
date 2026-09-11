@@ -54,7 +54,12 @@ https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/AGENTS.m
 
 ## ライセンス
 
-未確定（CC BY-SA 4.0 を検討中）。確定までは All rights reserved。
+本リポジトリの文章（`AGENTS.md`、`principles/`、`calc/*.md`、`cases/`、`dist/`、`assumptions.yaml`）は [CC BY-SA 4.0](LICENSE) で提供します。出典（TERASS、江口亮介『住宅購入の思考法』）を示し、改変物を同じライセンスで公開する限り、自由に利用・改変・再配布できます。
+
+次のものはこのライセンスの対象外です。
+
+- `calc/住宅購入バランスシート.xlsx`: 書籍の購入者付録で、著作権は江口亮介にあります。本リポジトリでの公開は著者の許諾に基づくもので、二次配布はできません。
+- `scripts/` のコード: [MIT License](scripts/LICENSE) で提供します。
 
 ## 出典
 
