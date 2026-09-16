@@ -7,7 +7,7 @@ ChatGPT は https://chatgpt.com/?q=<prompt>、Claude は https://claude.ai/new?q
 - embed（推奨）: dist/lite.md の全文を q に埋め込む。AIがURLを開く必要がないので無料版でも動く。
   日本語は URL エンコードで約9倍に膨らみ、約36,000文字になる。ブラウザのリンクとしては問題ないが、
   QRコード（上限約4,000文字）や一部の短縮URLサービスには入らない。
-- fetch: AGENTS.md の URL と要点だけを渡す（約3,600文字）。QR や短縮URL向け。
+- fetch: GitHub のリポジトリURL（README に AI向け前提を埋め込み済み）と要点だけを渡す（約4,000文字）。QR や短縮URL向け。
   無料版 ChatGPT は URL を開けないことが多いため、読めなかった場合の逃げ道（要点版の5ルール）を含める。
 
 ※ 各サービスの q パラメータの挙動と受け付ける長さは変わることがある。公開前に実機で確認すること。
@@ -18,11 +18,11 @@ import urllib.parse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-RAW = "https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/AGENTS.md"
+REPO = "https://github.com/terass-inc/home-buying-framework"
 SERVICES = [("ChatGPT", "https://chatgpt.com/?q="), ("Claude", "https://claude.ai/new?q=")]
 
-FETCH_PROMPT = f"""まず次のURLの内容を読み、その前提で住宅購入の相談に答えてください。
-{RAW}
+FETCH_PROMPT = f"""まず次のページの「AIへの前提」以下を読み、その前提で住宅購入の相談に答えてください。
+{REPO}
 
 URLを実際に読めた場合だけ「完全版を読み込みました」と言い、読めなかった場合は読めたふりをせず「要点版で進めます」と言ってから、最低限次の5つを守ってください。
 1. 結論より先に「なぜ買うのか」を掘り（「家賃がもったいない」は理由ではない）、次に「何年住む予定か（売却時期）」を確認する

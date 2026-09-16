@@ -13,5 +13,5 @@ jobs:
           python-version: "3.12"
       - name: Regenerate dist/lite.md and check size
         run: python3 scripts/build_lite.py
-      - name: Fail if dist/lite.md is stale
-        run: git diff --exit-code -- dist/lite.md
+      - name: Fail if dist/lite.md or README.md is stale
+        run: git diff --exit-code -- dist/lite.md README.md

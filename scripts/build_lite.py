@@ -102,8 +102,29 @@ def main() -> None:
     (ROOT / "dist" / "lite.md").write_text(out, encoding="utf-8")
     n = len(out)
     print(f"dist/lite.md: {n}字 (上限 {LIMIT}字)")
+    inject_readme(out)
     if n > LIMIT:
         sys.exit(1)
+
+
+README_START = "<!-- lite:embed:start -->"
+README_END = "<!-- lite:embed:end -->"
+
+
+def inject_readme(lite: str) -> None:
+    """README.md のマーカー間に lite 本文（5つのルール以降）を埋め込む。
+
+    AIに https://github.com/terass-inc/home-buying-framework を渡す方式では、AIが読むのは
+    リポジトリページに描画された README なので、README 自体を AI向けの前提にしておく。
+    """
+    body = lite[lite.index("## 絶対に守る5つのルール"):].rstrip()
+    p = ROOT / "README.md"
+    t = p.read_text(encoding="utf-8")
+    a, b = t.index(README_START) + len(README_START), t.index(README_END)
+    new = t[:a] + "\n" + body + "\n" + t[b:]
+    if new != t:
+        p.write_text(new, encoding="utf-8")
+    print(f"README.md: {len(new)}字（AI向け前提を埋め込み）")
 
 
 if __name__ == "__main__":
