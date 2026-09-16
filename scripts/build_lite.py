@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-LIMIT = 4500
+LIMIT = 5000
 
 # 本書第6章「理想の家を見つける4つのステップ」の順に話題を束ねる
 STEPS = [

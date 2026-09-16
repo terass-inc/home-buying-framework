@@ -48,6 +48,7 @@ ownership_costs:                     # 本書付録Excel「2) 購入vs賃貸シ�
 rent:                                # 本書付録Excelの賃貸モデル。賃料の上昇率ではなく「住み替え」で賃料が変わる
   renewal_fee_months: 1              # 2年（24カ月）ごとに賃料1カ月分
   renewal_interval_months: 24
+  comparable_rent_ratio_pct_of_price_per_year: 3.8   # 比較に使う賃料の仮置き目安（物件価格に対する年率）。本書付録Excelの初期値（5,000万円・月16万円）の比率。同等物件の相場が分かればそれを優先。本書外の追加論点
   initial_cost_months: 4.5           # 住み替え時の初期費用（敷金・礼金・仲介手数料など）。賃料の4〜5カ月分
   example_moves:                     # Excel初期値の住み替え例。利用者の予定で上書きする
     - {after_years: 5, rent_yen_per_month: 180000}    # 家族が増えて広くする
