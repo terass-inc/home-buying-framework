@@ -8,20 +8,29 @@ ChatGPT や Claude に住宅購入の相談をする前に、これを読み込�
 
 ## 使い方（スマホで3ステップ）
 
-1. [この文章](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/dist/lite.md) を開いて、全文をコピーする（約3,000字）
+1. [この文章](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/dist/lite.md) を開いて、全文をコピーする（約4,500字）
 2. ChatGPT や Claude の入力欄に貼り付けて送信する
 3. AIが「家を買おうと思ったきっかけを教えてください」と聞いてきたら、そこから相談を始める
 
-これだけで、AIはこの前提を会話全体に適用します。
+これだけで、AIはこの前提を会話全体に適用します。本文をそのまま渡すので、無料版でも、AIがURLを開けない環境でも使えます。
 
-### もう少し詳しく使う（Claude・ChatGPT有料版など、URLを読めるAI）
+### URLを読ませる方法は補助扱い
 
-会話の最初に次のように書きます。
+「このURLを読んでください」とリンクだけを渡す方法は、次の理由で失敗しやすいため、上の貼り付けを基本にしてください。
+
+- 無料版の ChatGPT は、URLを開く機能が使えないことが多く、「アクセスできません」と返すか、開かずに一般論で答える
+- URLを開けるAIでも、途中までしか読まない、読んだふりをして答えることがある
+- GitHub の robots.txt は AI クローラー（GPTBot・ClaudeBot）に `raw` 配下の取得を許していない
+
+URLを読める環境（有料版で取得機能が有効な場合）で完全版を使いたいときは、読めなかった場合の逃げ道を含めて次のように書きます。
 
 ```
 https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/AGENTS.md
 このURLの内容を読み、その前提で住宅購入の相談に答えてください。
+実際に読めた場合だけ「完全版を読み込みました」と言ってください。読めなかった場合は読めたふりをせず「読めませんでした」と答えてください。
 ```
+
+完全版を確実に読ませたい場合は、ChatGPT・Claude の「プロジェクト」機能に `AGENTS.md` と `principles/` の各ファイルをアップロードするか、下の開発者向けの方法を使ってください。
 
 ### 開発者向け（Claude Code・Cursor など）
 
@@ -36,7 +45,7 @@ https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/AGENTS.m
 | `assumptions.yaml` | 計算に使う数値前提（金利、諸費用率、下落率、更新料など）と更新日 |
 | `calc/` | 賃貸か購入かの比較計算と住宅購入バランスシートの手順。本書の購入者付録Excel（`calc/住宅購入バランスシート.xlsx`）を同梱 |
 | `cases/` | テストケース。質問と、期待する回答の要点、NG判定 |
-| `dist/lite.md` | 上記を約3,000字に圧縮したコピペ用ファイル。`scripts/build_lite.py` で生成 |
+| `dist/lite.md` | 上記を約4,500字に圧縮したコピペ用ファイル。`scripts/build_lite.py` で生成 |
 
 ## なぜ作ったか
 
