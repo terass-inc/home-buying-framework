@@ -5,7 +5,7 @@
 1. `principles/` の該当ファイルを編集する。構成は `principles/_TEMPLATE.md` に従う。
 2. 数値を変えるなら `assumptions.yaml` を直し、`updated_at` を更新する。本文の数値は yaml のキー名で参照する。
 3. `cases/` の関連ケースで期待回答が崩れないか確認する。必要ならケースを追加する。
-4. `python3 scripts/build_lite.py` を実行して `dist/lite.md` を再生成し、4,500字を超えていないか確認する。
+4. `python3 scripts/build_lite.py` を実行して `dist/lite.md` を再生成し、5,000字（スクリプトの上限）を超えていないか確認する。超えたら追加分を圧縮する。
 
 ## 書き方
 
