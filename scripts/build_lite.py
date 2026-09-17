@@ -4,6 +4,7 @@
 取り込むもの:
 - AGENTS.md の <!-- lite:start --> 〜 <!-- lite:end --> の区間
 - 各 principles/NN-*.md の H1 タイトルと、先頭の引用ブロック（一文要約）。
+  <!-- lite:extra --> で囲んだ区間があれば、それも取り込む（手順まで載せたい話題のみ）。
   確認質問は AGENTS.md の区間と重複するため取り込まない
 - assumptions.yaml の主要な数値（キーは LITE_ASSUMPTIONS で指定）
 """
@@ -12,7 +13,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-LIMIT = 5500
+LIMIT = 6000
 
 # 本書第6章「理想の家を見つける4つのステップ」の順に話題を束ねる
 STEPS = [
@@ -66,6 +67,9 @@ def principle_digest(p: Path) -> str:
     lines = [f"**{title}**"]
     if quote:
         lines.append(quote.group(1).strip())
+    extra = re.search(r"<!-- lite:extra:start -->\n(.*?)<!-- lite:extra:end -->", t, re.S)
+    if extra:
+        lines.append(extra.group(1).strip())
     return "\n".join(lines)
 
 
