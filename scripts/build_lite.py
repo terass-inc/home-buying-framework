@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-LIMIT = 5000
+LIMIT = 5500
 
 # 本書第6章「理想の家を見つける4つのステップ」の順に話題を束ねる
 STEPS = [
@@ -23,7 +23,9 @@ STEPS = [
 ]
 
 LITE_ASSUMPTIONS = [
-    ("interest_rate", "simulation_default_pct", "比較シミュレーションの標準金利（実勢金利は必ず最新値を確認。見直し要）", "%"),
+    ("interest_rate", "simulation_default_pct", "標準金利（本書の前提。実勢金利との2本立てで示す。見直し要）", "%"),
+    ("inflation", "simulation_default_pct", "標準の物価上昇率（年。金利・賃料・保有コストとセットで動かす）", "%"),
+    ("inflation", "price_pass_through_pct", "物価上昇が物件価格に波及する割合（波及しない場合も必ず並べる）", "%"),
     ("purchase_costs", "simulation_default_pct", "購入諸費用（物件価格に対する率）", "%"),
     ("selling_costs", "simulation_default_pct", "売却諸費用（売却価格に対する率の概算）", "%"),
     ("ownership_costs", "repair_reserve_growth_pct_per_year", "修繕積立金の上昇率（年）", "%"),
@@ -32,7 +34,9 @@ LITE_ASSUMPTIONS = [
     ("rent", "initial_cost_months", "賃貸の住み替え時の初期費用（賃料の月数）", "カ月分"),
     ("depreciation", "condo_pct_per_year", "マンション価格の年間下落率（市況変化なし）", "%"),
     ("depreciation", "house_pct_per_year", "戸建て価格の年間下落率（市況変化なし）", "%"),
-    ("holding", "minimum_years_to_buy", "購入を勧める最低居住年数", "年"),
+    ("holding", "minimum_years_to_buy", "これ未満なら購入を勧めない居住年数（諸費用が回収できない）", "年"),
+    ("holding", "recommended_min_years", "購入を前向きに検討してよい居住年数（標準セットで賃貸を下回る年）", "年"),
+    ("danshin", "equivalent_premium_yen_per_month", "団信相当の死亡保障を別に買う場合の保険料（月。賃貸側に立てる）", "円"),
     ("holding", "wait_breakeven_drop_pct_per_year", "1年待つ場合の損益分岐となる下落率（得をするには5%以上が必要、本書第3章）", "%"),
     ("holding", "historical_max_drop_pct", "首都圏中古マンションの過去最大下落（リーマンショック時）", "%"),
     ("loan", "default_term_years", "ローン期間の原則", "年"),
@@ -76,6 +80,12 @@ def assumptions_digest() -> str:
         v = re.search(rf"^\s+{key}:\s*(.+?)\s*(?:#.*)?$", m.group(1), re.M)
         if v:
             val = v.group(1).strip().strip('"')
+            try:                                    # 4桁以上は桁区切りを入れる（3000円 → 3,000円）
+                num = float(val)
+                if num.is_integer() and abs(num) >= 1000:
+                    val = f"{int(num):,}"
+            except ValueError:
+                pass
             rows.append(f"- {label}: {val}{unit}")
     return "\n".join(rows)
 

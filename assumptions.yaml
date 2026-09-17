@@ -1,13 +1,31 @@
 # 数値前提（AIが計算・比較に使うデフォルト値）
 # 出典: 『住宅購入の思考法』（江口亮介, 2024）のシミュレーション前提を基に、2026年時点で見直したもの。
 # 「見直し要」の項目は、回答時に最新値を利用者に確認するか、Web検索で更新すること。
-updated_at: 2026-09-17
+updated_at: 2026-09-18
 
 interest_rate:
-  simulation_default_pct: 1.0        # 比較シミュレーションで使う標準金利（年率）。本書の前提を踏襲
+  simulation_default_pct: 1.0        # 本書の前提（物価一定・金利1.0%）。単独で使わず、必ず実勢金利との2本立てで示す
   note: "変動・固定の実勢金利は2024年以降上昇している。回答時は最新値を確認すること（見直し要）"
+  must_show_two_rates: "本書の1.0%と、回答時点の実勢金利の2本を必ず並べる。1.0%だけで示すと購入側が有利に出る（金利2.5%では分岐が後ろにずれる）"
+  scenario_link: "金利を動かすときは inflation.scenarios のセットで動かす。金利だけ上げて賃料・物価・物件価格を据え置くのは整合しない前提"
   screening_rate_pct: 3.0            # 審査金利。銀行が返済比率を計算するときに用いる仮の金利（3〜4%が一般的）
   screening_rate_note: "見直し要。銀行ごとに異なる"
+
+inflation:                           # 本書外の追加論点。計算はすべて名目で行い、金利・賃料・保有コスト・物件価格を同じ世界観でそろえるために使う
+  simulation_default_pct: 1.0        # 標準の物価上昇率（年率）
+  rule: "金利が高いのは物価が上がっているからで、そのときは賃料・管理費・修繕費・物件価格も名目で上がる。金利だけ上げて他を据え置くと、購入側だけが不利になる整合しない比較になる"
+  scenarios:                         # 3セットを必ず並べる。セット内の数値を単独で入れ替えない
+    low:    {inflation_pct: 0.0, interest_rate_pct: 1.0, rent_growth_pct: 0.0, management_fee_growth_pct: 0.0, repair_reserve_growth_pct: 2.0}
+    medium: {inflation_pct: 1.0, interest_rate_pct: 1.5, rent_growth_pct: 1.0, management_fee_growth_pct: 0.5, repair_reserve_growth_pct: 3.0}
+    high:   {inflation_pct: 2.0, interest_rate_pct: 2.5, rent_growth_pct: 2.0, management_fee_growth_pct: 1.0, repair_reserve_growth_pct: 4.0}
+  scenarios_note: "low は本書の前提（物価一定・金利1.0%）。medium・high の金利は実勢の水準に合わせて回答時に更新する（見直し要）"
+  price_pass_through_pct: 100        # 物価上昇が物件価格に波及する割合。標準は100%
+  price_pass_through_note: "インフレ下で購入が有利に出るかを決める最大の分岐。波及率0%（物価が上がっても価格が上がらない）も必ず並べる。人口が減るエリアでは波及率は低い。エリアの優劣は断言しないが、波及率の前提が結論を左右することは必ず伝える"
+  nominal_price_formula: "N年後の名目価格 = 物件価格 × (1 − 経年減価率)^N × (1 + インフレ率 × 波及率)^N"
+  rent_stickiness_note: "日本では物価が上がっても家賃が上がりにくい時期があった（消費者物価指数の家賃はほぼ横ばい）。物価上昇率より低い賃料上昇率（例 物価2.0%・賃料0.5%）のケースも示す"
+  loan_note: "インフレは固定金利の借入の実質負担を軽くする。ただし変動金利で借りていれば返済額そのものが増えるので、この効果は固定金利を前提とした話だと明示する"
+  discounting: "現在価値への割引は行わない。双方の名目キャッシュフローを同じ年数で積み上げて比べる。割引率を置くと結論が割引率に依存するため"
+  income_note: "予算算定では収入据え置き（悲観シナリオ）で見る。これは家計のストレステストであり、比較シミュレーションの物価前提とは目的が違う。混在させず、どちらの話をしているか明示する"
 
 loan:
   default_term_years: 35             # 通常35年、最長50年。80歳までの完済が通常（本書付録Excel）。短縮は繰上返済で後から実現できる（本書外の追加論点）
@@ -47,7 +65,10 @@ depreciation:                        # 市況変化なしの前提での物件�
 ownership_costs:                     # 本書付録Excel「2) 購入vs賃貸シミュレーション」の初期値
   condo_management_fee_yen_per_month: 14000   # 管理費（月）。5000万円の都市部ファミリーマンションの例
   condo_repair_reserve_yen_per_month: 14000   # 修繕積立金（月）
-  repair_reserve_growth_pct_per_year: 3.0     # 修繕積立金の上昇率。築年が進むと積立額が増える前提（Excel初期値）
+  management_fee_growth_pct_per_year: 0.5     # 管理費の上昇率（名目）。人件費で上がるが、実勢では据え置く管理組合が多く、物価上昇率の半分程度で置く（打ち合わせ仮定）
+  management_fee_growth_note: "本書付録Excelは管理費を据え置いている。据え置くと購入側が有利に出るため標準で上昇させるが、実勢はあまり上がらないので物価上昇率と同率では置かない"
+  repair_reserve_growth_pct_per_year: 3.0     # 修繕積立金の上昇率（名目、標準セット）。Excel初期値と同じ
+  repair_reserve_real_growth_pct_per_year: 2.0  # うち築年進行による段階増額分（実質）。名目 = この値 + インフレ率
   property_tax_yen_per_year: 120000           # 固定資産税。都市部のファミリーマンションで年10〜20万円
   condo_fixed_costs_yen_per_year: 350000      # 上記を合算した簡略値（本書「はじめに」のシミュレーションでは固定）
   renovation_yen_per_10years: 1000000         # 10年に1度100万円
@@ -81,8 +102,18 @@ rent:                                # 本書付録Excelの賃貸モデル（住
     - {after_years: 20, rent_yen_per_month: 140000}   # 子供が独立して小さくする
   example_moves_note: "この例は20年後に賃料が下がる（縮小する）前提なので、住み替え予定を聞かずに使うと賃貸側を安く見せる。住み替えの予定と広さは必ず利用者に確認する"
 
+danshin:                             # 団体信用生命保険。購入側にだけ付く保障なので、比較では賃貸側に同等保障の費用を立てる（本書外の追加論点）
+  equivalent_premium_yen_per_month: 3000   # 残債と同等の死亡保障を別に買う場合の保険料の目安（30〜40代・残高5,000万円の逓減定期保険）
+  note: "見直し要。年齢・性別・健康状態で大きく変わるので、利用者の実額があればそれを使う"
+  double_count_guard: "既に生命保険に加入している人は、団信で減額できる分だけを価値として数える。保障を二重に積まない"
+  optional_danshin_note: "フラット35など団信が任意のローンでは別途特約料がかかる。その場合は賃貸側に立てず、購入側のコストに計上する"
+  not_a_reason_to_buy: "団信は購入の付帯効果であって購入理由ではない（principles/05-danshin-and-costs.md）。金額を出しても『保険目的で買う』方向には使わない"
+
 holding:
-  minimum_years_to_buy: 5            # 諸費用7%を回収できないため、5年未満で手放す見込みなら購入を勧めない
+  minimum_years_to_buy: 5            # 本書第2章「買ったほうがいい人」の3条件の1つ。諸費用7%を回収できないため、5年未満で手放す見込みなら購入を勧めない
+  recommended_min_years: 7           # 本書外。標準セットで購入の純負担が賃貸を下回る年。購入を前向きに考えるならこの年数以上の居住見通しを条件にする
+  recommended_min_years_note: "7年は金利1.0〜1.5%・物価0〜1.0%のセットでの分岐。金利2.5%・物価2.0%のセットなら5年目に早まるが、物価が物件価格に波及しなければ14年目、賃料も上がらなければ35年目まで後ろにずれる。年数は前提とセットで示す"
+  
   wait_breakeven_drop_pct_per_year: 3.6   # 家賃180万円/年÷5000万円。待って得するには年5%以上の下落が必要
   historical_max_drop_pct: 6.3       # 首都圏中古マンション、リーマンショック時（2008年5月→2009年4月）
 
