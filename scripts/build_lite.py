@@ -26,6 +26,8 @@ LITE_ASSUMPTIONS = [
     ("interest_rate", "simulation_default_pct", "比較シミュレーションの標準金利（実勢金利は必ず最新値を確認。見直し要）", "%"),
     ("purchase_costs", "simulation_default_pct", "購入諸費用（物件価格に対する率）", "%"),
     ("ownership_costs", "repair_reserve_growth_pct_per_year", "修繕積立金の上昇率（年）", "%"),
+    ("rent", "growth_pct_per_year", "賃料上昇率（年。標準。0%・2%も並べる。本書外）", "%"),
+    ("rent", "comparable_rent_ratio_pct_of_price_per_year", "比較賃料の仮置き（物件価格に対する年率。相場が分かればそちら）", "%"),
     ("rent", "initial_cost_months", "賃貸の住み替え時の初期費用（賃料の月数）", "カ月分"),
     ("depreciation", "condo_pct_per_year", "マンション価格の年間下落率（市況変化なし）", "%"),
     ("depreciation", "house_pct_per_year", "戸建て価格の年間下落率（市況変化なし）", "%"),
@@ -67,7 +69,7 @@ def assumptions_digest() -> str:
     updated = re.search(r"^updated_at:\s*(\S+)", t, re.M).group(1)
     rows = [f"数値前提（{updated} 時点。金利・税制は必ず最新値を確認）"]
     for section, key, label, unit in LITE_ASSUMPTIONS:
-        m = re.search(rf"^{section}:[^\n]*\n((?:[ \t]+.*\n)+)", t, re.M)
+        m = re.search(rf"^{section}:[^\n]*\n((?:(?:[ \t]+.*)?\n)+)", t, re.M)
         if not m:
             continue
         v = re.search(rf"^\s+{key}:\s*(.+?)\s*(?:#.*)?$", m.group(1), re.M)
