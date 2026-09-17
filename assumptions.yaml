@@ -1,7 +1,7 @@
 # 数値前提（AIが計算・比較に使うデフォルト値）
 # 出典: 『住宅購入の思考法』（江口亮介, 2024）のシミュレーション前提を基に、2026年時点で見直したもの。
 # 「見直し要」の項目は、回答時に最新値を利用者に確認するか、Web検索で更新すること。
-updated_at: 2026-09-18
+updated_at: 2026-09-17
 
 interest_rate:
   simulation_default_pct: 1.0        # 本書の前提（物価一定・金利1.0%）。単独で使わず、必ず実勢金利との2本立てで示す
@@ -117,10 +117,53 @@ holding:
   wait_breakeven_drop_pct_per_year: 3.6   # 家賃180万円/年÷5000万円。待って得するには年5%以上の下落が必要
   historical_max_drop_pct: 6.3       # 首都圏中古マンション、リーマンショック時（2008年5月→2009年4月）
 
-tax_and_programs:
-  mortgage_deduction: "制度は年度ごとに変わる（見直し要）。2024年時点: 中古10年・最大140万円、新築省エネ子育て世帯13年・最大455万円"
-  mortgage_deduction_min_area_sqm: 50
-  gift_tax_exemption: "住宅取得資金の直系尊属からの贈与非課税枠は縮小傾向（見直し要）"
+tax_and_programs:                    # 制度は年度ごとに変わる。回答時に必ず最新値を確認する（見直し要）
+  checked_at: 2026-09-17             # 下記の内容を確認した日
+  stance: "控除・補助は『原則として使える前提』で案内し、使えなくなる条件を並べて、適用の確定は税理士・金融機関・自治体への相談に回す。『使えます』とも『使えません』とも断定しない"
+
+  mortgage_deduction:                # 住宅ローン控除（2026年＝令和8年入居の制度。租税特別措置法第41条）
+    rate_pct: 0.7                    # 年末ローン残高に対する控除率
+    period_years: 13                 # 原則13年
+    period_years_other_housing: 10   # 省エネ基準に適合しない既存住宅（「その他の住宅」）は10年
+    deadline: "2030年12月31日までの入居分（令和8年度税制改正で5年延長）"
+    limit_new_man_yen:               # 新築・買取再販の借入限度額（単位 万円）。2026〜2027年入居
+      {certified: 4500, zeh: 3500, energy_saving: 2000}
+    limit_new_child_man_yen:         # 同、子育て世帯・若者夫婦世帯の上乗せ後（単位 万円）
+      {certified: 5000, zeh: 4500, energy_saving: 3000}
+    limit_used_man_yen:              # 既存住宅（中古）の借入限度額（単位 万円）
+      {certified_or_zeh: 3500, energy_saving: 2000, other: 2000}
+    limit_used_child_man_yen:
+      {certified_or_zeh: 4500, energy_saving: 3000}
+    child_household: "19歳未満の子がいる世帯、または夫婦のいずれかが40歳未満の世帯"
+    income_limit_man_yen: 2000       # 合計所得金額の上限。超えた年は適用なし
+    income_limit_small_area_man_yen: 1000   # 床面積40〜50㎡の住宅を使う場合の上限
+    min_area_sqm: 50
+    min_area_sqm_special: 40         # 40〜50㎡は所得1,000万円以下の年だけ適用。子育て世帯の上乗せは使えない
+    used_housing_age_rule: "1982年1月1日以降に建築、または耐震基準適合証明を取得。旧耐震（`seismic.old_standard_cutoff`）は証明がなければ対象外"
+    not_applicable:                  # 「使えない」ほうの条件。相談者に当てはまるか確認する
+      - "合計所得金額が2,000万円を超える年（その年だけ適用なし）"
+      - "床面積が50㎡未満（40〜50㎡は所得1,000万円以下の年のみ）"
+      - "旧耐震で耐震基準適合証明がない中古"
+      - "省エネ基準に適合しない新築（一定の経過措置を除く）"
+      - "取得から6カ月以内に入居していない"
+      - "セカンドハウス・投資用・親族間売買など居住・取引の要件を満たさないもの"
+    simulation_default_man_yen_per_year: 14   # シミュレーションの既定値。中古「その他の住宅」の限度2,000万円 × 0.7% = 14万円
+    simulation_default_years: 10              # 同、10年。省エネ基準適合の証明があれば13年で再計算する
+    sources:
+      - "https://www.zeitax.jp/ownersvision/2026/05/26/"
+      - "https://jitsumu-guide.com/mortgage-deduction-guide-2026/"
+
+  subsidies:                         # 補助金。予算上限に達すると年度内でも受付終了するため、必ず公式サイトで最新の受付状況を確認する
+    new_construction: "住宅省エネ2026キャンペーン「みらいエコ住宅2026事業」（国土交通省ほか3省連携）。第2期の申請期間は2026年5月13日〜12月31日（注文住宅の長期優良・ZEH水準は9月30日まで）。予算上限に達し次第終了。補助額と対象住宅の性能区分は公式サイトで確認する（https://mirai-eco2026.mlit.go.jp/）"
+    local: "自治体独自の補助（新婚・子育て世帯向け、移住支援、省エネ改修など）は市区町村ごとに条件も予算も違う。『自治体の補助があるかもしれないので、市区町村の住宅課に確認を』と案内し、金額は断定しない"
+    note: "見直し要。補助事業は年度で名称も要件も変わる。事業名を断定する前に公式サイトの存在を確認する"
+
+  gift_tax_exemption:                # 住宅取得等資金に係る贈与税の非課税措置
+    limit_man_yen: {quality_housing: 1000, other: 500}   # 質の高い住宅1,000万円、それ以外500万円（単位 万円）
+    basic_deduction_man_yen: 110     # 暦年課税の基礎控除。合わせて最大1,110万円
+    deadline: "2026年12月31日までの贈与（延長されるかは未確定。年内の贈与を検討している人には期限が近いことを伝える）"
+    donor: "直系尊属（父母・祖父母）からの贈与"
+    note: "見直し要。適用には申告が必要で、要件の確定は税理士・税務署へ"
 
 space:
   child_additional_sqm: "10〜15㎡/人"
