@@ -24,6 +24,13 @@ purchase_costs:
   simulation_default_pct: 7.0
   earnest_money_pct: 5.0             # 手付金の目安
 
+selling_costs:                       # 売却時にかかる費用。本書付録Excelには含まれないが、手残りの計算では標準で差し引く
+  brokerage_fee_formula: "(売却価格 × 3% + 6万円) × 1.1"   # 税込。売却価格400万円超の場合の上限額（400万円以下は別規定）
+  other_costs_yen: 40000             # 抵当権抹消の登記費用・司法書士報酬・印紙、ローンの一括返済手数料など（3〜5万円）
+  simulation_default_pct: 3.5        # 率で概算するときの既定値。5,000万円で3.51%
+  rate_by_price_note: "率は価格帯でズレる（3,000万円で3.65%、5,000万円で3.51%、1.0億円で3.41%）。+6万円の影響が価格に反比例するため。金額を出せるなら brokerage_fee_formula + other_costs_yen で計算する"
+  excluded: "譲渡益への課税（税理士へ）、ハウスクリーニング・残置物処分・引っ越し費用は含まない"
+
 depreciation:                        # 市況変化なしの前提での物件価格下落率
   condo_pct_per_year: 1.5            # RC造47年・建物7割（首都圏）から算出。Excelの「中」シナリオ
   house_pct_per_year: 1.4            # 木造22年・建物3割（首都圏）から算出

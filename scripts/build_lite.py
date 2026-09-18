@@ -25,6 +25,7 @@ STEPS = [
 LITE_ASSUMPTIONS = [
     ("interest_rate", "simulation_default_pct", "比較シミュレーションの標準金利（実勢金利は必ず最新値を確認。見直し要）", "%"),
     ("purchase_costs", "simulation_default_pct", "購入諸費用（物件価格に対する率）", "%"),
+    ("selling_costs", "simulation_default_pct", "売却諸費用（売却価格に対する率の概算）", "%"),
     ("ownership_costs", "repair_reserve_growth_pct_per_year", "修繕積立金の上昇率（年）", "%"),
     ("rent", "growth_pct_per_year", "賃料上昇率（年。標準。0%・2%も並べる。本書外）", "%"),
     ("rent", "comparable_rent_ratio_pct_of_price_per_year", "比較賃料の仮置き（物件価格に対する年率。相場が分かればそちら）", "%"),
