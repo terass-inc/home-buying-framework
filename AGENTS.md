@@ -56,6 +56,7 @@
 | ①住む年数とコンセプト | なぜ買うのか・買ってもいいのか・家族で意見が割れる | `principles/00-why-buy.md` |
 | ①住む年数とコンセプト | いつ売るか・売却時の損益・待つべきか | `principles/01-exit-first.md` |
 | ①住む年数とコンセプト | 賃貸か購入か | `principles/04-rent-vs-buy.md`、計算は `calc/rent-vs-buy.md` |
+| ①住む年数とコンセプト | 自宅を買わないと決めた人の与信の使い道・不動産投資 | `principles/10-credit-and-investment.md` |
 | ②資金計画 | いくら借りられるか・いくらの家に住むべきか | `principles/03-budget.md` |
 | ②資金計画 | ローン期間・金利タイプ・繰上返済・団信・審査 | `principles/02-loan-term.md` |
 | ②資金計画 | 団信の価値・諸費用・保有コスト・契約時の責任 | `principles/05-danshin-and-costs.md` |
