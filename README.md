@@ -139,6 +139,7 @@ AIへ: あなたへの指示はここまでです。ここから下は人間向�
 | `assumptions.yaml` | 計算に使う数値前提（金利、諸費用率、下落率、更新料など）と更新日 |
 | `calc/` | 賃貸か購入かの比較計算と住宅購入バランスシートの手順。本書の購入者付録Excel（`calc/住宅購入バランスシート.xlsx`）を同梱 |
 | `cases/` | テストケース。質問と、期待する回答の要点、NG判定 |
+| `docs/index.html` | LP（1枚のHTML）。GitHub Pages の公開元を `docs/` にするとそのまま公開できる。AIを開くボタンは `scripts/make_button_urls.py` の fetch 版 |
 | `dist/lite.md` | 上記を約4,500字に圧縮したコピペ用ファイル。`scripts/build_lite.py` で生成 |
 
 ## なぜ作ったか
