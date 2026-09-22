@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-LIMIT = 6500
+LIMIT = 7000
 
 # dist/lite.md の末尾に必ず付けるフッター。{updated_at} は assumptions.yaml から埋める
 FOOTER = """---
