@@ -21,7 +21,7 @@ https://github.com/terass-inc/home-buying-framework
 
 AIが「家を買おうと思ったきっかけを教えてください」と聞いてきたら、そこから相談を始めてください。AIはこのページの前提を会話全体に適用します。
 
-AIが「URLを開けません」と答えた場合（無料版 ChatGPT など）は、[こちらの文章](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/dist/lite.md)を全文コピーして貼り付けてください（約6,400字。内容は下の「AIへの前提」と同じです）。
+AIが「URLを開けません」と答えた場合（無料版 ChatGPT など）は、[こちらの文章](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/dist/lite.md)を全文コピーして貼り付けてください（約6,700字。内容は下の「AIへの前提」と同じです）。
 
 ## AIへの前提（ここから下をAIが読みます）
 
@@ -156,7 +156,7 @@ AIへ: あなたへの指示はここまでです。ここから下は人間向�
 | `calc/` | 賃貸か購入かの比較計算と住宅購入バランスシートの手順。本書の購入者付録Excel（`calc/住宅購入バランスシート.xlsx`）を同梱 |
 | `cases/` | テストケース。質問と、期待する回答の要点、NG判定 |
 | `docs/index.html` | LP（1枚のHTML）。GitHub Pages の公開元を `docs/` にするとそのまま公開できる。AIを開くボタンは `scripts/make_button_urls.py` の fetch 版 |
-| `dist/lite.md` | 上記を約6,400字に圧縮したコピペ用ファイル。`scripts/build_lite.py` で生成 |
+| `dist/lite.md` | 上記を約6,700字に圧縮したコピペ用ファイル。`scripts/build_lite.py` で生成 |
 
 ## なぜ作ったか
 
