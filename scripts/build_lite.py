@@ -7,6 +7,9 @@
   <!-- lite:extra --> で囲んだ区間があれば、それも取り込む（手順まで載せたい話題のみ）。
   確認質問は AGENTS.md の区間と重複するため取り込まない
 - assumptions.yaml の主要な数値（キーは LITE_ASSUMPTIONS で指定）
+
+末尾には FOOTER（免責・作成者・出典）を必ず付ける。全文コピペで使われる経路なので、
+ここに免責が無いと README・LICENSE から切り離された状態で配られることになる。
 """
 import re
 import sys
@@ -14,6 +17,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 LIMIT = 6500
+
+# dist/lite.md の末尾に必ず付けるフッター。{updated_at} は assumptions.yaml から埋める
+FOOTER = """---
+※このテキストは一般的な考え方を示すものであり、個別の投資・税務・法務の助言ではありません。融資の可否や条件、税額、物件の価値を保証するものでもありません。金利・税制・融資基準は変わります。最終的な判断は、不動産エージェントや独立系ファイナンシャルプランナーなどの専門家と行ってください。数値前提は{updated_at}時点のものです。
+※作成：株式会社TERASS／江口亮介（同社代表取締役）
+※出典：https://github.com/terass-inc/home-buying-framework （CC BY-SA 4.0）"""
 
 # 本書第6章「理想の家を見つける4つのステップ」の順に話題を束ねる
 STEPS = [
@@ -73,10 +82,14 @@ def principle_digest(p: Path) -> str:
     return "\n".join(lines)
 
 
+def assumptions_updated_at() -> str:
+    t = read(ROOT / "assumptions.yaml")
+    return re.search(r"^updated_at:\s*(\S+)", t, re.M).group(1)
+
+
 def assumptions_digest() -> str:
     t = read(ROOT / "assumptions.yaml")
-    updated = re.search(r"^updated_at:\s*(\S+)", t, re.M).group(1)
-    rows = [f"数値前提（{updated} 時点。金利・税制は必ず最新値を確認）"]
+    rows = [f"数値前提（{assumptions_updated_at()} 時点。金利・税制は必ず最新値を確認）"]
     for section, key, label, unit in LITE_ASSUMPTIONS:
         m = re.search(rf"^{section}:[^\n]*\n((?:(?:[ \t]+.*)?\n)+)", t, re.M)
         if not m:
@@ -114,12 +127,14 @@ def main() -> None:
     parts.append("## " + assumptions_digest())
     parts.append("")
     parts.append("最終判断は不動産エージェントや独立系ファイナンシャルプランナーなど専門家と行ってください。")
-    out = "\n".join(parts).rstrip() + "\n"
+    body = "\n".join(parts).rstrip() + "\n"
+    inject_readme(body)                 # README には本文のみ。免責は README 冒頭と DISCLAIMER.md にある
+    # フッターは本文を組み立てたあとに足す。先に足すと圧縮・抽出の対象になって落ちうる
+    out = body + "\n" + FOOTER.format(updated_at=assumptions_updated_at()) + "\n"
     (ROOT / "dist").mkdir(exist_ok=True)
     (ROOT / "dist" / "lite.md").write_text(out, encoding="utf-8")
     n = len(out)
     print(f"dist/lite.md: {n}字 (上限 {LIMIT}字)")
-    inject_readme(out)
     if n > LIMIT:
         sys.exit(1)
 
