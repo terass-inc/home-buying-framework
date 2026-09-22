@@ -50,7 +50,7 @@ p{margin:0}
 /* header */
 .header{position:relative;background:#fff;z-index:20;border-bottom:1px solid var(--line-soft)}
 .header-in{display:flex;align-items:center;justify-content:space-between;gap:28px;padding:22px var(--gutter);max-width:1440px;margin:auto}
-.brand{display:flex;align-items:center;gap:18px;text-decoration:none;color:var(--ink)}
+.brand{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--ink)}
 .brand img{height:20px;width:auto}
 .brand span{font-size:13px;letter-spacing:.06em;padding-left:18px;border-left:1px solid var(--line)}
 .nav{display:flex;align-items:center;gap:26px;font-size:13px}
@@ -63,7 +63,7 @@ p{margin:0}
 .hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#09141dcc 0%,#09141d80 45%,#09141d10 100%)}
 .hero .wrap{position:relative;z-index:1;padding-top:100px;padding-bottom:100px;width:100%}
 .hero .eyebrow{color:#ffffffb8}
-.hero h1{font-size:clamp(28px,4vw,48px);line-height:1.6;letter-spacing:.025em;font-weight:500;margin:0 0 30px}
+.hero h1{font-size:clamp(34px,5.4vw,72px);line-height:1.35;letter-spacing:.005em;font-weight:700;margin:0 0 30px}
 .hero .sub{font-size:clamp(15px,1.5vw,20px);letter-spacing:.03em;line-height:1.9;max-width:34em}
 .scroll{position:absolute;left:var(--gutter);bottom:36px;z-index:1;font-family:var(--num);font-size:11px;letter-spacing:.19em;color:#ffffffb8;display:flex;gap:16px;text-decoration:none}
 
@@ -139,7 +139,7 @@ p{margin:0}
 }
 @media (max-width:700px){
   .nav{display:none}
-  .brand span{display:none}
+  .brand span{font-size:11px;padding-left:12px}
   .section{padding:72px 0}
   .hero{min-height:560px}
   .hero .wrap{padding-top:70px;padding-bottom:110px}
@@ -159,7 +159,7 @@ p{margin:0}
 
 <header class="header">
   <div class="header-in">
-    <a class="brand" href="#top"><img src="assets/terass-logo.png" alt="TERASS" width="1600" height="322"><span>住宅購入の思考法</span></a>
+    <a class="brand" href="#top"><img src="assets/terass-logo.png" alt="TERASS" width="1600" height="322"><span>AI × 住宅購入の思考法</span></a>
     <nav class="nav">
       <a href="#why">なぜ必要か</a>
       <a href="#how">使い方</a>
@@ -173,24 +173,23 @@ p{margin:0}
 <section class="hero" id="top">
   <img src="assets/hero.webp" alt="" width="1600" height="1000" fetchpriority="high">
   <div class="wrap">
-    <p class="eyebrow">AI × 住宅購入の思考法</p>
     <h1>AIに家の相談をする前に、<br>この前提を読ませてください。</h1>
-    <p class="sub">「利息を減らしたい」と聞けば、AIは素直に短いローンを勧めます。3年後に売る予定でも。住宅の判断でAIが踏み外しやすいところを、先に読み込ませる前提としてまとめました。</p>
+    <p class="sub">住宅の相談でAIが踏み外しやすいところを、先に読ませる前提としてまとめました。書籍『住宅購入の思考法』のエッセンスと、年間約4,000件の取引を支援するTERASSの知見を、AIが読める形にしています。</p>
   </div>
   <a class="scroll" href="#intro">SCROLL TO DISCOVER <span>↓</span></a>
 </section>
 
 <section class="section" id="intro">
   <div class="wrap two">
-    <h2>結論の前に、<br>理由から伺います。</h2>
+    <h2>教育していないAIは、<br>3年で売る人にも20年ローンを勧めます。</h2>
     <div>
-      <p class="body">この前提を読み込んだAIは、まず「家を買おうと思ったきっかけ」を聞きます。なぜ買うのか、何年住むのかが決まらないうちは、ローンの期間も、賃貸か購入かも答えません。ChatGPT でも Claude でも、無料版でも使えます。</p>
+      <p class="body">「住宅ローンの利息を減らしたい」と相談すれば、AIは期間を短くしてきます。利息の総額は減りますが、3年で売る人の損益を決めるのは、売るときにローンがいくら残るかです。何年住むのかを聞かないまま出た答えは、数年後に「売りたいのに、残債が売却額を上回って売れない」という形で返ってきます。<br><br>この前提を読み込んだAIは、まず「家を買おうと思ったきっかけ」を聞きます。なぜ買うのか、何年住むのかが決まらないうちは、ローンの期間も、賃貸か購入かも答えません。ChatGPT と Claude で確認しています。無料版でも使えます。</p>
       <div class="actions">
         <a class="btn btn-navy" href="https://chatgpt.com/?q=%E3%81%BE%E3%81%9A%E6%AC%A1%E3%81%AE%E3%83%9A%E3%83%BC%E3%82%B8%E3%81%AE%E3%80%8CAI%E3%81%B8%E3%81%AE%E5%89%8D%E6%8F%90%E3%80%8D%E4%BB%A5%E4%B8%8B%E3%82%92%E8%AA%AD%E3%81%BF%E3%80%81%E3%81%9D%E3%81%AE%E5%89%8D%E6%8F%90%E3%81%A7%E4%BD%8F%E5%AE%85%E8%B3%BC%E5%85%A5%E3%81%AE%E7%9B%B8%E8%AB%87%E3%81%AB%E7%AD%94%E3%81%88%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82%0Ahttps%3A%2F%2Fgithub.com%2Fterass-inc%2Fhome-buying-framework%0A%0AURL%E3%82%92%E5%AE%9F%E9%9A%9B%E3%81%AB%E8%AA%AD%E3%82%81%E3%81%9F%E5%A0%B4%E5%90%88%E3%81%A0%E3%81%91%E3%80%8C%E5%AE%8C%E5%85%A8%E7%89%88%E3%82%92%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E3%81%BE%E3%81%97%E3%81%9F%E3%80%8D%E3%81%A8%E8%A8%80%E3%81%84%E3%80%81%E8%AA%AD%E3%82%81%E3%81%AA%E3%81%8B%E3%81%A3%E3%81%9F%E5%A0%B4%E5%90%88%E3%81%AF%E8%AA%AD%E3%82%81%E3%81%9F%E3%81%B5%E3%82%8A%E3%82%92%E3%81%9B%E3%81%9A%E3%80%8C%E8%A6%81%E7%82%B9%E7%89%88%E3%81%A7%E9%80%B2%E3%82%81%E3%81%BE%E3%81%99%E3%80%8D%E3%81%A8%E8%A8%80%E3%81%A3%E3%81%A6%E3%81%8B%E3%82%89%E3%80%81%E6%9C%80%E4%BD%8E%E9%99%90%E6%AC%A1%E3%81%AE5%E3%81%A4%E3%82%92%E5%AE%88%E3%81%A3%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82%0A1.%20%E7%B5%90%E8%AB%96%E3%82%88%E3%82%8A%E5%85%88%E3%81%AB%E3%80%8C%E3%81%AA%E3%81%9C%E8%B2%B7%E3%81%86%E3%81%AE%E3%81%8B%E3%80%8D%E3%82%92%E6%8E%98%E3%82%8A%EF%BC%88%E3%80%8C%E5%AE%B6%E8%B3%83%E3%81%8C%E3%82%82%E3%81%A3%E3%81%9F%E3%81%84%E3%81%AA%E3%81%84%E3%80%8D%E3%81%AF%E7%90%86%E7%94%B1%E3%81%A7%E3%81%AF%E3%81%AA%E3%81%84%EF%BC%89%E3%80%81%E6%AC%A1%E3%81%AB%E3%80%8C%E4%BD%95%E5%B9%B4%E4%BD%8F%E3%82%80%E4%BA%88%E5%AE%9A%E3%81%8B%EF%BC%88%E5%A3%B2%E5%8D%B4%E6%99%82%E6%9C%9F%EF%BC%89%E3%80%8D%E3%82%92%E7%A2%BA%E8%AA%8D%E3%81%99%E3%82%8B%0A2.%20%E3%83%AD%E3%83%BC%E3%83%B3%E6%9C%9F%E9%96%93%E3%81%AF%E5%88%A9%E6%81%AF%E7%B7%8F%E9%A1%8D%E3%81%A7%E3%81%AA%E3%81%8F%E3%80%81%E5%A3%B2%E5%8D%B4%E6%99%82%E3%81%AE%E6%AE%8B%E5%82%B5%E3%81%A8%E6%89%8B%E6%AE%8B%E3%82%8A%E3%81%A7%E8%80%83%E3%81%88%E3%82%8B%E3%80%82%E5%8E%9F%E5%89%87%E3%81%AF%E7%B5%84%E3%82%81%E3%82%8B%E6%9C%80%E9%95%B7%E3%81%A7%E7%B5%84%E3%81%BF%E3%80%81%E7%9F%AD%E7%B8%AE%E3%81%AF%E7%B9%B0%E4%B8%8A%E8%BF%94%E6%B8%88%E3%81%A7%E8%A1%8C%E3%81%86%0A3.%20%E3%80%8C%E5%80%9F%E3%82%8A%E3%82%89%E3%82%8C%E3%82%8B%E9%A1%8D%E3%80%8D%EF%BC%88%E5%B9%B4%E5%8F%8E7%E3%80%9C8%E5%80%8D%EF%BC%89%E3%81%A8%E3%80%8C%E5%80%9F%E3%82%8A%E3%82%8B%E3%81%B9%E3%81%8D%E9%A1%8D%E3%80%8D%EF%BC%88%E3%83%A9%E3%82%A4%E3%83%95%E3%83%97%E3%83%A9%E3%83%B3%E3%81%8B%E3%82%89%E9%80%86%E7%AE%97%EF%BC%89%E3%82%92%E6%B7%B7%E5%90%8C%E3%81%97%E3%81%AA%E3%81%84%0A4.%20%E8%B3%83%E8%B2%B8%E3%81%A8%E8%B3%BC%E5%85%A5%E3%81%AE%E6%AF%94%E8%BC%83%E3%81%AF%E3%80%81%E8%B3%BC%E5%85%A5%E5%81%B4%E3%81%AB%E5%A3%B2%E5%8D%B4%E5%BE%8C%E3%81%AE%E6%89%8B%E6%AE%8B%E3%82%8A%E3%81%A8%E4%BF%AE%E7%B9%95%E7%A9%8D%E7%AB%8B%E9%87%91%E3%81%AE%E4%B8%8A%E6%98%87%E3%80%81%E8%B3%83%E8%B2%B8%E5%81%B4%E3%81%AB%E6%9B%B4%E6%96%B0%E6%96%99%E3%81%A8%E4%BD%8F%E3%81%BF%E6%9B%BF%E3%81%88%E6%99%82%E3%81%AE%E5%88%9D%E6%9C%9F%E8%B2%BB%E7%94%A8%E3%82%92%E5%85%A5%E3%82%8C%E3%82%8B%0A5.%20%E5%B8%82%E6%B3%81%E3%81%AE%E4%BA%88%E6%B8%AC%E3%81%A8%E3%82%A8%E3%83%AA%E3%82%A2%E3%81%AE%E5%84%AA%E5%8A%A3%E3%81%AF%E6%96%AD%E8%A8%80%E3%81%97%E3%81%AA%E3%81%84%0A%0A%E6%BA%96%E5%82%99%E3%81%8C%E3%81%A7%E3%81%8D%E3%81%9F%E3%82%89%E3%80%81%E8%A6%81%E7%B4%84%E3%82%84%E5%BE%A9%E5%94%B1%E3%82%92%E3%81%9B%E3%81%9A%E3%80%8C%E5%89%8D%E6%8F%90%E3%82%92%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E3%81%BE%E3%81%97%E3%81%9F%E3%80%82%E3%81%BE%E3%81%9A%E3%80%81%E5%AE%B6%E3%82%92%E8%B2%B7%E3%81%8A%E3%81%86%E3%81%A8%E6%80%9D%E3%81%A3%E3%81%9F%E3%81%8D%E3%81%A3%E3%81%8B%E3%81%91%E3%82%92%E6%95%99%E3%81%88%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%8D%E3%81%AE1%E6%96%87%E3%81%A0%E3%81%91%E8%BF%94%E3%81%97%E3%81%A6%E4%BC%9A%E8%A9%B1%E3%82%92%E5%A7%8B%E3%82%81%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82%E7%A2%BA%E8%AA%8D%E4%BA%8B%E9%A0%85%E3%81%AF%E4%B8%80%E5%BA%A6%E3%81%AB%E5%85%A8%E9%83%A8%E8%81%9E%E3%81%8B%E3%81%9A%E3%80%81%E9%A0%86%E3%81%AB%E8%81%9E%E3%81%84%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82%0A" target="_blank" rel="noopener">ChatGPT で始める <span class="ar">↗</span></a>
         <a class="btn btn-navy" href="https://claude.ai/new?q=%E3%81%BE%E3%81%9A%E6%AC%A1%E3%81%AE%E3%83%9A%E3%83%BC%E3%82%B8%E3%81%AE%E3%80%8CAI%E3%81%B8%E3%81%AE%E5%89%8D%E6%8F%90%E3%80%8D%E4%BB%A5%E4%B8%8B%E3%82%92%E8%AA%AD%E3%81%BF%E3%80%81%E3%81%9D%E3%81%AE%E5%89%8D%E6%8F%90%E3%81%A7%E4%BD%8F%E5%AE%85%E8%B3%BC%E5%85%A5%E3%81%AE%E7%9B%B8%E8%AB%87%E3%81%AB%E7%AD%94%E3%81%88%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82%0Ahttps%3A%2F%2Fgithub.com%2Fterass-inc%2Fhome-buying-framework%0A%0AURL%E3%82%92%E5%AE%9F%E9%9A%9B%E3%81%AB%E8%AA%AD%E3%82%81%E3%81%9F%E5%A0%B4%E5%90%88%E3%81%A0%E3%81%91%E3%80%8C%E5%AE%8C%E5%85%A8%E7%89%88%E3%82%92%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E3%81%BE%E3%81%97%E3%81%9F%E3%80%8D%E3%81%A8%E8%A8%80%E3%81%84%E3%80%81%E8%AA%AD%E3%82%81%E3%81%AA%E3%81%8B%E3%81%A3%E3%81%9F%E5%A0%B4%E5%90%88%E3%81%AF%E8%AA%AD%E3%82%81%E3%81%9F%E3%81%B5%E3%82%8A%E3%82%92%E3%81%9B%E3%81%9A%E3%80%8C%E8%A6%81%E7%82%B9%E7%89%88%E3%81%A7%E9%80%B2%E3%82%81%E3%81%BE%E3%81%99%E3%80%8D%E3%81%A8%E8%A8%80%E3%81%A3%E3%81%A6%E3%81%8B%E3%82%89%E3%80%81%E6%9C%80%E4%BD%8E%E9%99%90%E6%AC%A1%E3%81%AE5%E3%81%A4%E3%82%92%E5%AE%88%E3%81%A3%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82%0A1.%20%E7%B5%90%E8%AB%96%E3%82%88%E3%82%8A%E5%85%88%E3%81%AB%E3%80%8C%E3%81%AA%E3%81%9C%E8%B2%B7%E3%81%86%E3%81%AE%E3%81%8B%E3%80%8D%E3%82%92%E6%8E%98%E3%82%8A%EF%BC%88%E3%80%8C%E5%AE%B6%E8%B3%83%E3%81%8C%E3%82%82%E3%81%A3%E3%81%9F%E3%81%84%E3%81%AA%E3%81%84%E3%80%8D%E3%81%AF%E7%90%86%E7%94%B1%E3%81%A7%E3%81%AF%E3%81%AA%E3%81%84%EF%BC%89%E3%80%81%E6%AC%A1%E3%81%AB%E3%80%8C%E4%BD%95%E5%B9%B4%E4%BD%8F%E3%82%80%E4%BA%88%E5%AE%9A%E3%81%8B%EF%BC%88%E5%A3%B2%E5%8D%B4%E6%99%82%E6%9C%9F%EF%BC%89%E3%80%8D%E3%82%92%E7%A2%BA%E8%AA%8D%E3%81%99%E3%82%8B%0A2.%20%E3%83%AD%E3%83%BC%E3%83%B3%E6%9C%9F%E9%96%93%E3%81%AF%E5%88%A9%E6%81%AF%E7%B7%8F%E9%A1%8D%E3%81%A7%E3%81%AA%E3%81%8F%E3%80%81%E5%A3%B2%E5%8D%B4%E6%99%82%E3%81%AE%E6%AE%8B%E5%82%B5%E3%81%A8%E6%89%8B%E6%AE%8B%E3%82%8A%E3%81%A7%E8%80%83%E3%81%88%E3%82%8B%E3%80%82%E5%8E%9F%E5%89%87%E3%81%AF%E7%B5%84%E3%82%81%E3%82%8B%E6%9C%80%E9%95%B7%E3%81%A7%E7%B5%84%E3%81%BF%E3%80%81%E7%9F%AD%E7%B8%AE%E3%81%AF%E7%B9%B0%E4%B8%8A%E8%BF%94%E6%B8%88%E3%81%A7%E8%A1%8C%E3%81%86%0A3.%20%E3%80%8C%E5%80%9F%E3%82%8A%E3%82%89%E3%82%8C%E3%82%8B%E9%A1%8D%E3%80%8D%EF%BC%88%E5%B9%B4%E5%8F%8E7%E3%80%9C8%E5%80%8D%EF%BC%89%E3%81%A8%E3%80%8C%E5%80%9F%E3%82%8A%E3%82%8B%E3%81%B9%E3%81%8D%E9%A1%8D%E3%80%8D%EF%BC%88%E3%83%A9%E3%82%A4%E3%83%95%E3%83%97%E3%83%A9%E3%83%B3%E3%81%8B%E3%82%89%E9%80%86%E7%AE%97%EF%BC%89%E3%82%92%E6%B7%B7%E5%90%8C%E3%81%97%E3%81%AA%E3%81%84%0A4.%20%E8%B3%83%E8%B2%B8%E3%81%A8%E8%B3%BC%E5%85%A5%E3%81%AE%E6%AF%94%E8%BC%83%E3%81%AF%E3%80%81%E8%B3%BC%E5%85%A5%E5%81%B4%E3%81%AB%E5%A3%B2%E5%8D%B4%E5%BE%8C%E3%81%AE%E6%89%8B%E6%AE%8B%E3%82%8A%E3%81%A8%E4%BF%AE%E7%B9%95%E7%A9%8D%E7%AB%8B%E9%87%91%E3%81%AE%E4%B8%8A%E6%98%87%E3%80%81%E8%B3%83%E8%B2%B8%E5%81%B4%E3%81%AB%E6%9B%B4%E6%96%B0%E6%96%99%E3%81%A8%E4%BD%8F%E3%81%BF%E6%9B%BF%E3%81%88%E6%99%82%E3%81%AE%E5%88%9D%E6%9C%9F%E8%B2%BB%E7%94%A8%E3%82%92%E5%85%A5%E3%82%8C%E3%82%8B%0A5.%20%E5%B8%82%E6%B3%81%E3%81%AE%E4%BA%88%E6%B8%AC%E3%81%A8%E3%82%A8%E3%83%AA%E3%82%A2%E3%81%AE%E5%84%AA%E5%8A%A3%E3%81%AF%E6%96%AD%E8%A8%80%E3%81%97%E3%81%AA%E3%81%84%0A%0A%E6%BA%96%E5%82%99%E3%81%8C%E3%81%A7%E3%81%8D%E3%81%9F%E3%82%89%E3%80%81%E8%A6%81%E7%B4%84%E3%82%84%E5%BE%A9%E5%94%B1%E3%82%92%E3%81%9B%E3%81%9A%E3%80%8C%E5%89%8D%E6%8F%90%E3%82%92%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E3%81%BE%E3%81%97%E3%81%9F%E3%80%82%E3%81%BE%E3%81%9A%E3%80%81%E5%AE%B6%E3%82%92%E8%B2%B7%E3%81%8A%E3%81%86%E3%81%A8%E6%80%9D%E3%81%A3%E3%81%9F%E3%81%8D%E3%81%A3%E3%81%8B%E3%81%91%E3%82%92%E6%95%99%E3%81%88%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%8D%E3%81%AE1%E6%96%87%E3%81%A0%E3%81%91%E8%BF%94%E3%81%97%E3%81%A6%E4%BC%9A%E8%A9%B1%E3%82%92%E5%A7%8B%E3%82%81%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82%E7%A2%BA%E8%AA%8D%E4%BA%8B%E9%A0%85%E3%81%AF%E4%B8%80%E5%BA%A6%E3%81%AB%E5%85%A8%E9%83%A8%E8%81%9E%E3%81%8B%E3%81%9A%E3%80%81%E9%A0%86%E3%81%AB%E8%81%9E%E3%81%84%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82%0A" target="_blank" rel="noopener">Claude で始める <span class="ar">↗</span></a>
         <a class="text-link" href="#how">自分で貼る方法を見る <span>↓</span></a>
       </div>
-      <p class="note" style="margin-top:24px">ボタンを押すと、前提を読み込む指示が入力欄に入った状態でAIが開きます。あとは送信するだけです。</p>
+      <p class="note" style="margin-top:24px">ボタンを押すと、前提を読み込む指示が入力欄に入った状態でAIが開きます。あとは送信してください。</p>
     </div>
   </div>
 </section>
@@ -200,13 +199,13 @@ p{margin:0}
     <p class="eyebrow">Why this exists</p>
     <div class="two">
       <div class="sec-head">
-        <h2>利息を減らしたい、と聞けば、<br>AIは20年ローンを勧めます。</h2>
-        <p class="body lead">ある人は、3年で住み替える予定で家を買いました。AIに「利息を減らしたい」と相談すると、住宅ローンを20年で組むよう勧められ、そのとおりにしました。利息総額は減ります。しかし3年で売る人にとって大事なのは、売却時にローンがいくら残り、手元にいくら戻るかです。</p>
+        <h2>なぜ、こうなるのか。</h2>
+        <p class="body lead">AIは聞かれたことに答えただけで、間違ってはいません。前提が抜けていただけです。住宅の判断は、いつ売るかを決めないと何も決まらない。そこを補えば、同じAIがまともに答えます。</p>
       </div>
       <ol class="numlist">
-        <li><span class="no">01</span><div><h3>AIは質問の仕方にそのまま従う</h3><p>「利息を減らしたい」と聞かれれば、利息総額を最小にする答えを返します。前提を聞き返しません。</p></div></li>
-        <li><span class="no">02</span><div><h3>学習元には偏りがある</h3><p>不動産ブログや業者の記事に含まれるポジショントークを、そのまま一般論として返すことがあります。</p></div></li>
-        <li><span class="no">03</span><div><h3>だから、先に前提を読ませる</h3><p>「AIを使うな」ではなく「この前提を読ませてから相談してほしい」。それがこのページの提案です。</p></div></li>
+        <li><span class="no">01</span><div><h3>AIは聞かれたとおりに答える</h3><p>「利息を減らしたい」と聞けば、利息の総額が最も小さくなる答えが返ってきます。何年住むのかは、聞き返してくれません。</p></div></li>
+        <li><span class="no">02</span><div><h3>学習元が偏っている</h3><p>ネット上の住宅の情報は、書き手に立場があるものが多い。AIはそれを一般論として返してきます。私たちも立場のある側なので、書いている原則はGitHubで全部公開しています。</p></div></li>
+        <li><span class="no">03</span><div><h3>だから、先に前提を読ませる</h3><p>AIは使ってください。相談を始める前に、この前提を読ませてほしい。このページで言いたいことは、それだけです。</p></div></li>
       </ol>
     </div>
   </div>
@@ -219,16 +218,16 @@ p{margin:0}
       <h2>2行を貼るだけ。</h2>
     </div>
     <ol class="process">
-      <li><span class="no">01</span><h3>AIに次の2行を貼って送信する</h3><p>上のボタンを押せば、入った状態で開きます。自分で貼る場合は下の文をコピーしてください。</p></li>
-      <li><span class="no">02</span><h3>「きっかけを教えてください」と聞かれる</h3><p>AIが前提を読み込むと、要約や復唱をせず、まずこの1文だけを返します。</p></li>
-      <li><span class="no">03</span><h3>そこから相談を始める</h3><p>なぜ買うのか、何年住むのか、を順に確かめてから、ローンや賃貸か購入かに答えます。</p></li>
+      <li><span class="no">01</span><h3>AIに次の2行を貼って送信する</h3><p>上のボタンを押せば、入力欄に入った状態で開きます。自分で貼るなら、下の文をコピーしてください。</p></li>
+      <li><span class="no">02</span><h3>「きっかけを教えてください」と聞かれる</h3><p>前提を読み込んだAIは、要約も復唱もせず、この1文だけを返します。</p></li>
+      <li><span class="no">03</span><h3>そこから相談を始める</h3><p>なぜ買うのか、何年住むのかを順に確かめてから、AIはローンや賃貸か購入かに答えます。</p></li>
     </ol>
     <div class="prompt" style="margin-top:52px">
       <pre id="prompt">https://github.com/terass-inc/home-buying-framework
 このページの「AIへの前提」以下を読み、その前提で住宅購入の相談に答えてください。</pre>
       <button class="btn btn-outline" type="button" data-copy="prompt">2行をコピー <span class="ar">⧉</span></button>
     </div>
-    <p class="callout"><b>AIが「URLを開けません」と答えたら。</b> 無料版の ChatGPT など、URLを開けないAIもあります。その場合は前提の全文（約4,500字）をコピーして、そのまま貼り付けてください。内容は同じです。</p>
+    <p class="callout"><b>AIが「URLを開けません」と答えたら。</b> 無料版の ChatGPT など、URLを開けないAIもあります。そのときは前提の全文（約6,700字）をコピーして、そのまま貼り付けてください。内容は同じです。</p>
     <div class="actions" style="margin-top:24px">
       <button class="btn btn-navy" type="button" id="copy-lite">前提の全文をコピー <span class="ar">⧉</span></button>
       <a class="text-link" href="https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/dist/lite.md" target="_blank" rel="noopener">全文を開く <span>↗</span></a>
@@ -241,14 +240,14 @@ p{margin:0}
     <p class="eyebrow">Principles</p>
     <div class="sec-head">
       <h2>AIが守る、5つのルール。</h2>
-      <p class="body lead">前提の全文は GitHub で公開しています。ここでは、AIの回答が最も崩れやすい5点だけを示します。</p>
+      <p class="body lead">前提の全文はGitHubで公開しています。ここに出すのは、AIの回答がいちばん崩れやすい5点です。</p>
     </div>
     <ol class="rules">
-      <li><span class="no">01</span><div><h3>結論より先に「なぜ買うのか」、次に「いつまで住むか」を聞く</h3><p>「家賃がもったいない」は入口であって理由ではありません。住宅の損益は売却時点で確定するので、居住予定年数を聞かずに結論を出しません。</p></div></li>
-      <li><span class="no">02</span><div><h3>利息総額ではなく、売却時の残債と手残りで考える</h3><p>ローン期間は後から短くできても、長くはできません。期間の短縮は、繰上返済で後から行えます。</p></div></li>
-      <li><span class="no">03</span><div><h3>「借りられる額」と「借りるべき額」を混同しない</h3><p>年収の7〜8倍は銀行側の上限の目安で、予算ではありません。予算はライフプランから、金利は高め・収入は伸びない前提で逆算します。</p></div></li>
-      <li><span class="no">04</span><div><h3>賃貸か購入かの比較は、両側に同じ厳しさで</h3><p>購入側に売却後の手残りと修繕積立金の上昇、賃貸側に更新料と住み替え費用を入れます。賃料は今の家賃ではなく、買う物件と同等の物件の相場を使います。</p></div></li>
-      <li><span class="no">05</span><div><h3>市況とエリアの優劣は断言しない</h3><p>「今は高いから待つべき」「このエリアは上がる」は根拠を持って言えません。待つコストと過去の下落実績を示し、エリアは現地を見に行くよう促します。</p></div></li>
+      <li><span class="no">01</span><div><h3>結論より先に「なぜ買うのか」、次に「いつまで住むか」を聞く</h3><p>「家賃がもったいない」は入口であって、理由ではありません。住宅の損益は売るときに確定します。何年住むのかを聞かないまま、ローン期間も物件も賃貸か購入かも答えません。</p></div></li>
+      <li><span class="no">02</span><div><h3>利息総額ではなく、売却時の残債と手残りで考える</h3><p>ローン期間は後から短くできますが、長くはできません。原則は組める最長で組んで、短くしたければ繰上返済で調整します。</p></div></li>
+      <li><span class="no">03</span><div><h3>「借りられる額」と「借りるべき額」を混同しない</h3><p>年収の7〜8倍は銀行側の上限の目安で、予算ではありません。予算は子供や教育費、収入の見込みから、金利は高め・収入は伸びない前提で逆算します。</p></div></li>
+      <li><span class="no">04</span><div><h3>賃貸か購入かの比較は、両側に同じ厳しさで</h3><p>購入側に売却後の手残りと修繕積立金の上昇、賃貸側に更新料と住み替え費用を入れます。賃料は今の家賃ではなく、買う物件と同等の物件の募集賃料を使い、賃料も上がる前提で置きます。今の安い家賃と比べれば、賃貸が必ず有利に出ます。</p></div></li>
+      <li><span class="no">05</span><div><h3>市況とエリアの優劣は断言しない</h3><p>「今は高いから待つべき」「このエリアは上がる」は、根拠を持って言えません。待つあいだの家賃と過去の下落実績を示して、エリアは現地を歩くよう促します。金利だけを上げ下げした試算もしません。金利が高いのは物価が上がっているからで、そのときは賃料も物件価格も動きます。</p></div></li>
     </ol>
   </div>
 </section>
@@ -258,7 +257,7 @@ p{margin:0}
     <p class="eyebrow">Process</p>
     <div class="sec-head">
       <h2>本書の4ステップに沿って、<br>順番に進めます。</h2>
-      <p class="body lead">多くの人は物件見学から始めて混乱します。AIは、いきなり「この物件どう？」と聞かれても、前のステップが決まっているかを一言確かめてから答えます。</p>
+      <p class="body lead">本書によると、④の物件見学から始めて迷う人がいちばん多い。AIは、いきなり「この物件どう？」と聞かれても、前のステップが決まっているかを一言確かめてから答えます。</p>
     </div>
     <ol class="process four">
       <li><span class="no">Step 01</span><h3>住む年数と購入コンセプト</h3><p>なぜ買うのか。何年住むのか。賃貸では足りないのか。</p></li>
@@ -276,12 +275,12 @@ p{margin:0}
       <p class="label">出典と立場の開示</p>
       <h2 class="name">江口 亮介</h2>
       <p class="role">『住宅購入の思考法』著者 ／ 株式会社TERASS 代表取締役</p>
-      <p class="body">このページとAI向けの前提は、書籍『住宅購入の思考法』（2024年）のエッセンスと、年間約4,000件の不動産取引を支援する TERASS の知見を、著者の許諾のもとAIが読める形に再構成したものです。本文の転載ではありません。</p>
-      <p class="body">私たちは不動産仲介会社であり、ポジションがあります。「買うべき」に誘導しないよう原則を書いていますが、他の情報源と併せて判断してください。最終判断は、不動産エージェントや独立系ファイナンシャルプランナーなど専門家と行ってください。</p>
+      <p class="body">このページとAI向けの前提は、書籍『住宅購入の思考法』（2024年）のエッセンスと、年間約4,000件の不動産取引を支援するTERASSの知見を、著者の許諾のもとAIが読める形に再構成しました。本文の転載ではありません。</p>
+      <p class="body">私たちは不動産仲介会社です。家が売れれば仲介手数料が入る立場で、これを書いています。「買うべき」に寄らないよう原則を組み立てましたが、それでも立場は残ります。他の情報源と併せて読んでください。最終判断は、不動産エージェントや独立系ファイナンシャルプランナーなどの専門家と決めてください。「買わない」「今は買わない」も、この前提では正しい結論として扱います。</p>
       <div class="actions" style="margin-top:32px">
         <a class="text-link" href="https://github.com/terass-inc/home-buying-framework" target="_blank" rel="noopener">前提の全文と根拠を GitHub で見る <span>↗</span></a>
       </div>
-      <p class="note" style="margin-top:20px">文章は CC BY-SA 4.0 で公開しています。おかしな回答を見つけたら、Issue で教えてください。</p>
+      <p class="note" style="margin-top:20px">文章はCC BY-SA 4.0で公開しています。おかしな回答を見つけたら、GitHubのIssueで教えてください。</p>
     </div>
   </div>
 </section>
@@ -291,12 +290,12 @@ p{margin:0}
   <div class="wrap">
     <p class="eyebrow">Start with why</p>
     <h2>まず、なぜ買うのかから。</h2>
-    <p class="body">家の相談は、結論ではなく理由から始まります。前提を読み込んだAIと、そこから話してみてください。</p>
+    <p class="body">家の相談は理由から始まります。何年住むつもりなのか、その家で何をしたいのか。前提を読み込んだAIと、そこから話してください。</p>
     <div class="actions" style="margin-top:0">
       <a class="btn btn-accent" href="https://chatgpt.com/?q=%E3%81%BE%E3%81%9A%E6%AC%A1%E3%81%AE%E3%83%9A%E3%83%BC%E3%82%B8%E3%81%AE%E3%80%8CAI%E3%81%B8%E3%81%AE%E5%89%8D%E6%8F%90%E3%80%8D%E4%BB%A5%E4%B8%8B%E3%82%92%E8%AA%AD%E3%81%BF%E3%80%81%E3%81%9D%E3%81%AE%E5%89%8D%E6%8F%90%E3%81%A7%E4%BD%8F%E5%AE%85%E8%B3%BC%E5%85%A5%E3%81%AE%E7%9B%B8%E8%AB%87%E3%81%AB%E7%AD%94%E3%81%88%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82%0Ahttps%3A%2F%2Fgithub.com%2Fterass-inc%2Fhome-buying-framework%0A%0AURL%E3%82%92%E5%AE%9F%E9%9A%9B%E3%81%AB%E8%AA%AD%E3%82%81%E3%81%9F%E5%A0%B4%E5%90%88%E3%81%A0%E3%81%91%E3%80%8C%E5%AE%8C%E5%85%A8%E7%89%88%E3%82%92%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E3%81%BE%E3%81%97%E3%81%9F%E3%80%8D%E3%81%A8%E8%A8%80%E3%81%84%E3%80%81%E8%AA%AD%E3%82%81%E3%81%AA%E3%81%8B%E3%81%A3%E3%81%9F%E5%A0%B4%E5%90%88%E3%81%AF%E8%AA%AD%E3%82%81%E3%81%9F%E3%81%B5%E3%82%8A%E3%82%92%E3%81%9B%E3%81%9A%E3%80%8C%E8%A6%81%E7%82%B9%E7%89%88%E3%81%A7%E9%80%B2%E3%82%81%E3%81%BE%E3%81%99%E3%80%8D%E3%81%A8%E8%A8%80%E3%81%A3%E3%81%A6%E3%81%8B%E3%82%89%E3%80%81%E6%9C%80%E4%BD%8E%E9%99%90%E6%AC%A1%E3%81%AE5%E3%81%A4%E3%82%92%E5%AE%88%E3%81%A3%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82%0A1.%20%E7%B5%90%E8%AB%96%E3%82%88%E3%82%8A%E5%85%88%E3%81%AB%E3%80%8C%E3%81%AA%E3%81%9C%E8%B2%B7%E3%81%86%E3%81%AE%E3%81%8B%E3%80%8D%E3%82%92%E6%8E%98%E3%82%8A%EF%BC%88%E3%80%8C%E5%AE%B6%E8%B3%83%E3%81%8C%E3%82%82%E3%81%A3%E3%81%9F%E3%81%84%E3%81%AA%E3%81%84%E3%80%8D%E3%81%AF%E7%90%86%E7%94%B1%E3%81%A7%E3%81%AF%E3%81%AA%E3%81%84%EF%BC%89%E3%80%81%E6%AC%A1%E3%81%AB%E3%80%8C%E4%BD%95%E5%B9%B4%E4%BD%8F%E3%82%80%E4%BA%88%E5%AE%9A%E3%81%8B%EF%BC%88%E5%A3%B2%E5%8D%B4%E6%99%82%E6%9C%9F%EF%BC%89%E3%80%8D%E3%82%92%E7%A2%BA%E8%AA%8D%E3%81%99%E3%82%8B%0A2.%20%E3%83%AD%E3%83%BC%E3%83%B3%E6%9C%9F%E9%96%93%E3%81%AF%E5%88%A9%E6%81%AF%E7%B7%8F%E9%A1%8D%E3%81%A7%E3%81%AA%E3%81%8F%E3%80%81%E5%A3%B2%E5%8D%B4%E6%99%82%E3%81%AE%E6%AE%8B%E5%82%B5%E3%81%A8%E6%89%8B%E6%AE%8B%E3%82%8A%E3%81%A7%E8%80%83%E3%81%88%E3%82%8B%E3%80%82%E5%8E%9F%E5%89%87%E3%81%AF%E7%B5%84%E3%82%81%E3%82%8B%E6%9C%80%E9%95%B7%E3%81%A7%E7%B5%84%E3%81%BF%E3%80%81%E7%9F%AD%E7%B8%AE%E3%81%AF%E7%B9%B0%E4%B8%8A%E8%BF%94%E6%B8%88%E3%81%A7%E8%A1%8C%E3%81%86%0A3.%20%E3%80%8C%E5%80%9F%E3%82%8A%E3%82%89%E3%82%8C%E3%82%8B%E9%A1%8D%E3%80%8D%EF%BC%88%E5%B9%B4%E5%8F%8E7%E3%80%9C8%E5%80%8D%EF%BC%89%E3%81%A8%E3%80%8C%E5%80%9F%E3%82%8A%E3%82%8B%E3%81%B9%E3%81%8D%E9%A1%8D%E3%80%8D%EF%BC%88%E3%83%A9%E3%82%A4%E3%83%95%E3%83%97%E3%83%A9%E3%83%B3%E3%81%8B%E3%82%89%E9%80%86%E7%AE%97%EF%BC%89%E3%82%92%E6%B7%B7%E5%90%8C%E3%81%97%E3%81%AA%E3%81%84%0A4.%20%E8%B3%83%E8%B2%B8%E3%81%A8%E8%B3%BC%E5%85%A5%E3%81%AE%E6%AF%94%E8%BC%83%E3%81%AF%E3%80%81%E8%B3%BC%E5%85%A5%E5%81%B4%E3%81%AB%E5%A3%B2%E5%8D%B4%E5%BE%8C%E3%81%AE%E6%89%8B%E6%AE%8B%E3%82%8A%E3%81%A8%E4%BF%AE%E7%B9%95%E7%A9%8D%E7%AB%8B%E9%87%91%E3%81%AE%E4%B8%8A%E6%98%87%E3%80%81%E8%B3%83%E8%B2%B8%E5%81%B4%E3%81%AB%E6%9B%B4%E6%96%B0%E6%96%99%E3%81%A8%E4%BD%8F%E3%81%BF%E6%9B%BF%E3%81%88%E6%99%82%E3%81%AE%E5%88%9D%E6%9C%9F%E8%B2%BB%E7%94%A8%E3%82%92%E5%85%A5%E3%82%8C%E3%82%8B%0A5.%20%E5%B8%82%E6%B3%81%E3%81%AE%E4%BA%88%E6%B8%AC%E3%81%A8%E3%82%A8%E3%83%AA%E3%82%A2%E3%81%AE%E5%84%AA%E5%8A%A3%E3%81%AF%E6%96%AD%E8%A8%80%E3%81%97%E3%81%AA%E3%81%84%0A%0A%E6%BA%96%E5%82%99%E3%81%8C%E3%81%A7%E3%81%8D%E3%81%9F%E3%82%89%E3%80%81%E8%A6%81%E7%B4%84%E3%82%84%E5%BE%A9%E5%94%B1%E3%82%92%E3%81%9B%E3%81%9A%E3%80%8C%E5%89%8D%E6%8F%90%E3%82%92%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E3%81%BE%E3%81%97%E3%81%9F%E3%80%82%E3%81%BE%E3%81%9A%E3%80%81%E5%AE%B6%E3%82%92%E8%B2%B7%E3%81%8A%E3%81%86%E3%81%A8%E6%80%9D%E3%81%A3%E3%81%9F%E3%81%8D%E3%81%A3%E3%81%8B%E3%81%91%E3%82%92%E6%95%99%E3%81%88%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%8D%E3%81%AE1%E6%96%87%E3%81%A0%E3%81%91%E8%BF%94%E3%81%97%E3%81%A6%E4%BC%9A%E8%A9%B1%E3%82%92%E5%A7%8B%E3%82%81%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82%E7%A2%BA%E8%AA%8D%E4%BA%8B%E9%A0%85%E3%81%AF%E4%B8%80%E5%BA%A6%E3%81%AB%E5%85%A8%E9%83%A8%E8%81%9E%E3%81%8B%E3%81%9A%E3%80%81%E9%A0%86%E3%81%AB%E8%81%9E%E3%81%84%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82%0A" target="_blank" rel="noopener">ChatGPT で始める <span class="ar">↗</span></a>
       <a class="btn btn-outline light" href="https://claude.ai/new?q=%E3%81%BE%E3%81%9A%E6%AC%A1%E3%81%AE%E3%83%9A%E3%83%BC%E3%82%B8%E3%81%AE%E3%80%8CAI%E3%81%B8%E3%81%AE%E5%89%8D%E6%8F%90%E3%80%8D%E4%BB%A5%E4%B8%8B%E3%82%92%E8%AA%AD%E3%81%BF%E3%80%81%E3%81%9D%E3%81%AE%E5%89%8D%E6%8F%90%E3%81%A7%E4%BD%8F%E5%AE%85%E8%B3%BC%E5%85%A5%E3%81%AE%E7%9B%B8%E8%AB%87%E3%81%AB%E7%AD%94%E3%81%88%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82%0Ahttps%3A%2F%2Fgithub.com%2Fterass-inc%2Fhome-buying-framework%0A%0AURL%E3%82%92%E5%AE%9F%E9%9A%9B%E3%81%AB%E8%AA%AD%E3%82%81%E3%81%9F%E5%A0%B4%E5%90%88%E3%81%A0%E3%81%91%E3%80%8C%E5%AE%8C%E5%85%A8%E7%89%88%E3%82%92%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E3%81%BE%E3%81%97%E3%81%9F%E3%80%8D%E3%81%A8%E8%A8%80%E3%81%84%E3%80%81%E8%AA%AD%E3%82%81%E3%81%AA%E3%81%8B%E3%81%A3%E3%81%9F%E5%A0%B4%E5%90%88%E3%81%AF%E8%AA%AD%E3%82%81%E3%81%9F%E3%81%B5%E3%82%8A%E3%82%92%E3%81%9B%E3%81%9A%E3%80%8C%E8%A6%81%E7%82%B9%E7%89%88%E3%81%A7%E9%80%B2%E3%82%81%E3%81%BE%E3%81%99%E3%80%8D%E3%81%A8%E8%A8%80%E3%81%A3%E3%81%A6%E3%81%8B%E3%82%89%E3%80%81%E6%9C%80%E4%BD%8E%E9%99%90%E6%AC%A1%E3%81%AE5%E3%81%A4%E3%82%92%E5%AE%88%E3%81%A3%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82%0A1.%20%E7%B5%90%E8%AB%96%E3%82%88%E3%82%8A%E5%85%88%E3%81%AB%E3%80%8C%E3%81%AA%E3%81%9C%E8%B2%B7%E3%81%86%E3%81%AE%E3%81%8B%E3%80%8D%E3%82%92%E6%8E%98%E3%82%8A%EF%BC%88%E3%80%8C%E5%AE%B6%E8%B3%83%E3%81%8C%E3%82%82%E3%81%A3%E3%81%9F%E3%81%84%E3%81%AA%E3%81%84%E3%80%8D%E3%81%AF%E7%90%86%E7%94%B1%E3%81%A7%E3%81%AF%E3%81%AA%E3%81%84%EF%BC%89%E3%80%81%E6%AC%A1%E3%81%AB%E3%80%8C%E4%BD%95%E5%B9%B4%E4%BD%8F%E3%82%80%E4%BA%88%E5%AE%9A%E3%81%8B%EF%BC%88%E5%A3%B2%E5%8D%B4%E6%99%82%E6%9C%9F%EF%BC%89%E3%80%8D%E3%82%92%E7%A2%BA%E8%AA%8D%E3%81%99%E3%82%8B%0A2.%20%E3%83%AD%E3%83%BC%E3%83%B3%E6%9C%9F%E9%96%93%E3%81%AF%E5%88%A9%E6%81%AF%E7%B7%8F%E9%A1%8D%E3%81%A7%E3%81%AA%E3%81%8F%E3%80%81%E5%A3%B2%E5%8D%B4%E6%99%82%E3%81%AE%E6%AE%8B%E5%82%B5%E3%81%A8%E6%89%8B%E6%AE%8B%E3%82%8A%E3%81%A7%E8%80%83%E3%81%88%E3%82%8B%E3%80%82%E5%8E%9F%E5%89%87%E3%81%AF%E7%B5%84%E3%82%81%E3%82%8B%E6%9C%80%E9%95%B7%E3%81%A7%E7%B5%84%E3%81%BF%E3%80%81%E7%9F%AD%E7%B8%AE%E3%81%AF%E7%B9%B0%E4%B8%8A%E8%BF%94%E6%B8%88%E3%81%A7%E8%A1%8C%E3%81%86%0A3.%20%E3%80%8C%E5%80%9F%E3%82%8A%E3%82%89%E3%82%8C%E3%82%8B%E9%A1%8D%E3%80%8D%EF%BC%88%E5%B9%B4%E5%8F%8E7%E3%80%9C8%E5%80%8D%EF%BC%89%E3%81%A8%E3%80%8C%E5%80%9F%E3%82%8A%E3%82%8B%E3%81%B9%E3%81%8D%E9%A1%8D%E3%80%8D%EF%BC%88%E3%83%A9%E3%82%A4%E3%83%95%E3%83%97%E3%83%A9%E3%83%B3%E3%81%8B%E3%82%89%E9%80%86%E7%AE%97%EF%BC%89%E3%82%92%E6%B7%B7%E5%90%8C%E3%81%97%E3%81%AA%E3%81%84%0A4.%20%E8%B3%83%E8%B2%B8%E3%81%A8%E8%B3%BC%E5%85%A5%E3%81%AE%E6%AF%94%E8%BC%83%E3%81%AF%E3%80%81%E8%B3%BC%E5%85%A5%E5%81%B4%E3%81%AB%E5%A3%B2%E5%8D%B4%E5%BE%8C%E3%81%AE%E6%89%8B%E6%AE%8B%E3%82%8A%E3%81%A8%E4%BF%AE%E7%B9%95%E7%A9%8D%E7%AB%8B%E9%87%91%E3%81%AE%E4%B8%8A%E6%98%87%E3%80%81%E8%B3%83%E8%B2%B8%E5%81%B4%E3%81%AB%E6%9B%B4%E6%96%B0%E6%96%99%E3%81%A8%E4%BD%8F%E3%81%BF%E6%9B%BF%E3%81%88%E6%99%82%E3%81%AE%E5%88%9D%E6%9C%9F%E8%B2%BB%E7%94%A8%E3%82%92%E5%85%A5%E3%82%8C%E3%82%8B%0A5.%20%E5%B8%82%E6%B3%81%E3%81%AE%E4%BA%88%E6%B8%AC%E3%81%A8%E3%82%A8%E3%83%AA%E3%82%A2%E3%81%AE%E5%84%AA%E5%8A%A3%E3%81%AF%E6%96%AD%E8%A8%80%E3%81%97%E3%81%AA%E3%81%84%0A%0A%E6%BA%96%E5%82%99%E3%81%8C%E3%81%A7%E3%81%8D%E3%81%9F%E3%82%89%E3%80%81%E8%A6%81%E7%B4%84%E3%82%84%E5%BE%A9%E5%94%B1%E3%82%92%E3%81%9B%E3%81%9A%E3%80%8C%E5%89%8D%E6%8F%90%E3%82%92%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E3%81%BE%E3%81%97%E3%81%9F%E3%80%82%E3%81%BE%E3%81%9A%E3%80%81%E5%AE%B6%E3%82%92%E8%B2%B7%E3%81%8A%E3%81%86%E3%81%A8%E6%80%9D%E3%81%A3%E3%81%9F%E3%81%8D%E3%81%A3%E3%81%8B%E3%81%91%E3%82%92%E6%95%99%E3%81%88%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%8D%E3%81%AE1%E6%96%87%E3%81%A0%E3%81%91%E8%BF%94%E3%81%97%E3%81%A6%E4%BC%9A%E8%A9%B1%E3%82%92%E5%A7%8B%E3%82%81%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82%E7%A2%BA%E8%AA%8D%E4%BA%8B%E9%A0%85%E3%81%AF%E4%B8%80%E5%BA%A6%E3%81%AB%E5%85%A8%E9%83%A8%E8%81%9E%E3%81%8B%E3%81%9A%E3%80%81%E9%A0%86%E3%81%AB%E8%81%9E%E3%81%84%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84%E3%80%82%0A" target="_blank" rel="noopener">Claude で始める <span class="ar">↗</span></a>
     </div>
-    <span class="cnote">無料版でも使えます。AIがURLを開けない場合は「前提の全文をコピー」から貼り付けてください。</span>
+    <span class="cnote">無料版でも使えます。AIがURLを開けないときは「前提の全文をコピー」から貼り付けてください。</span>
   </div>
 </section>
 
