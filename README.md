@@ -155,8 +155,9 @@ AIへ: あなたへの指示はここまでです。ここから下は人間向�
 | `assumptions.yaml` | 計算に使う数値前提（金利、諸費用率、下落率、更新料など）と更新日 |
 | `calc/` | 賃貸か購入かの比較計算と住宅購入バランスシートの手順。本書の購入者付録Excelの計算を文章化したもので、Excel本体は同梱しない |
 | `cases/` | テストケース。質問と、期待する回答の要点、NG判定 |
-| `docs/index.html` | LP（1枚のHTML）。GitHub Pages の公開元を `docs/` にするとそのまま公開できる。AIを開くボタンは `scripts/make_button_urls.py` の fetch 版 |
+| `docs/index.html` | LP（1枚のHTML）。GitHub Pages（`main` の `docs/`）で https://terass-inc.github.io/home-buying-framework/ に公開。AIを開くボタンは `scripts/make_button_urls.py` の fetch 版 |
 | `dist/lite.md` | 上記を約6,700字に圧縮したコピペ用ファイル。`scripts/build_lite.py` で生成 |
+| `scripts/collect_traffic.py` | リポジトリの閲覧数・クローン数・流入元を毎日取得し、[`traffic-data` ブランチ](https://github.com/terass-inc/home-buying-framework/blob/traffic-data/SUMMARY.md)に積み上げる。`.github/workflows/traffic.yml` から実行 |
 
 ## なぜ作ったか
 
