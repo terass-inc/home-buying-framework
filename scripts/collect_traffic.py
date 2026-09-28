@@ -22,6 +22,7 @@ import datetime
 import json
 import os
 import sys
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -37,8 +38,12 @@ def get(repo, path, token):
             "X-GitHub-Api-Version": "2022-11-28",
         },
     )
-    with urllib.request.urlopen(req) as r:
-        return json.load(r)
+    try:
+        with urllib.request.urlopen(req) as r:
+            return json.load(r)
+    except urllib.error.HTTPError as e:
+        # 403 はトークンの権限不足・組織の承認待ち・期限切れのいずれか。GitHub の説明文を出して切り分ける
+        sys.exit(f"{e.code} {API + repo + path}: {e.read().decode(errors='replace')}")
 
 
 def read_csv(path):
