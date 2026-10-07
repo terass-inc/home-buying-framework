@@ -1,0 +1,4 @@
+# ローカル作業用の資料は公開しない
+.sources/
+.DS_Store
+node_modules/

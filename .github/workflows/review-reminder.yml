@@ -1,0 +1,44 @@
+name: review reminder
+
+# 数値前提（金利・税制・補助金・賃料指数など）の定期見直しを促す Issue を立てる。
+# 3カ月ごと（1月・4月・7月・10月の1日 00:00 UTC ＝ 日本時間 9:00）に実行する。
+# 本文は .github/review-checklist.md にある。
+on:
+  schedule:
+    - cron: "0 0 1 */3 *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      LABEL: review-reminder
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ラベルを用意する
+        run: gh label create "$LABEL" --color FBCA04 --description "数値前提の定期見直し" --force
+
+      - name: 未対応の見直し Issue があるか確認する
+        id: check
+        run: |
+          open=$(gh issue list --label "$LABEL" --state open --json number --jq 'length')
+          echo "open=$open" >> "$GITHUB_OUTPUT"
+          echo "未対応の見直し Issue: ${open}件"
+
+      - name: 見直し Issue を作成する
+        if: steps.check.outputs.open == '0'
+        run: |
+          title="数値前提の定期見直し（$(date -u +%Y-%m) 起票）"
+          gh issue create --title "$title" --label "$LABEL" --body-file .github/review-checklist.md
+          echo "作成しました: $title"
+
+      - name: 既存の Issue が残っているため作成しない
+        if: steps.check.outputs.open != '0'
+        run: echo "未対応の見直し Issue が ${{ steps.check.outputs.open }} 件あるため、新規作成をスキップした。"

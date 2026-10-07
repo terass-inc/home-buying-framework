@@ -1,0 +1,39 @@
+name: collect traffic
+# GitHub はトラフィックを直近14日分しか保持しないため、毎日取得して traffic-data ブランチに積み上げる。
+# main に毎日コミットすると Pages の再公開と履歴のノイズになるので、別ブランチに分けている。
+on:
+  schedule:
+    - cron: "0 0 * * *" # 毎日 9:00（日本時間）
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: traffic
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check out traffic-data branch
+        run: |
+          if git ls-remote --exit-code --heads origin traffic-data >/dev/null; then
+            git fetch origin traffic-data
+            git worktree add traffic origin/traffic-data
+          else
+            git worktree add --orphan -b traffic-data traffic
+          fi
+      - name: Collect traffic
+        env:
+          TRAFFIC_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
+        run: python3 scripts/collect_traffic.py --out traffic
+      - name: Commit and push
+        working-directory: traffic
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "トラフィックを取得（$(date -u +%F)）"
+          git push origin HEAD:traffic-data

@@ -1,0 +1,163 @@
+#!/usr/bin/env python3
+"""AGENTS.md と principles/ から、コピペ用のライト版 dist/lite.md を生成する。
+
+取り込むもの:
+- AGENTS.md の <!-- lite:start --> 〜 <!-- lite:end --> の区間
+- 各 principles/NN-*.md の H1 タイトルと、先頭の引用ブロック（一文要約）。
+  <!-- lite:extra --> で囲んだ区間があれば、それも取り込む（手順まで載せたい話題のみ）。
+  確認質問は AGENTS.md の区間と重複するため取り込まない
+- assumptions.yaml の主要な数値（キーは LITE_ASSUMPTIONS で指定）
+
+末尾には FOOTER（免責・作成者・出典）を必ず付ける。全文コピペで使われる経路なので、
+ここに免責が無いと README・LICENSE から切り離された状態で配られることになる。
+"""
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+LIMIT = 7000
+
+# dist/lite.md の末尾に必ず付けるフッター。{updated_at} は assumptions.yaml から埋める
+FOOTER = """---
+※このテキストは一般的な考え方を示すものであり、個別の投資・税務・法務の助言ではありません。融資の可否や条件、税額、物件の価値を保証するものでもありません。金利・税制・融資基準は変わります。最終的な判断は、不動産エージェントや独立系ファイナンシャルプランナーなどの専門家と行ってください。数値前提は{updated_at}時点のものです。
+※作成：株式会社TERASS／江口亮介（同社代表取締役）
+※出典：https://github.com/terass-inc/home-buying-framework （CC BY-SA 4.0）"""
+
+# 「家選びの4ステップ」の順に話題を束ねる
+STEPS = [
+    ("ステップ1 住む年数と購入コンセプト", ["00", "01", "04", "10"]),
+    ("ステップ2 資金計画", ["03", "02", "05"]),
+    ("ステップ3 条件整理", ["06", "07", "08"]),
+    ("ステップ4 物件見学", ["09"]),
+]
+
+LITE_ASSUMPTIONS = [
+    ("interest_rate", "simulation_default_pct", "標準金利（基本の前提。実勢金利との2本立てで示す。見直し要）", "%"),
+    ("inflation", "simulation_default_pct", "標準の物価上昇率（年。金利・賃料・保有コストとセットで動かす）", "%"),
+    ("inflation", "price_pass_through_pct", "物価上昇が物件価格に波及する割合（波及しない場合も必ず並べる）", "%"),
+    ("purchase_costs", "simulation_default_pct", "購入諸費用（物件価格に対する率）", "%"),
+    ("selling_costs", "simulation_default_pct", "売却諸費用（売却価格に対する率の概算）", "%"),
+    ("ownership_costs", "repair_reserve_growth_pct_per_year", "修繕積立金の上昇率（年）", "%"),
+    ("rent", "growth_pct_per_year", "賃料上昇率（年。標準。0%・2%も並べる）", "%"),
+    ("rent", "comparable_rent_ratio_pct_of_price_per_year", "比較賃料の仮置き（物件価格に対する年率。相場が分かればそちら）", "%"),
+    ("rent", "initial_cost_months", "賃貸の住み替え時の初期費用（賃料の月数）", "カ月分"),
+    ("depreciation", "condo_pct_per_year", "マンション価格の年間下落率（市況変化なし）", "%"),
+    ("depreciation", "house_pct_per_year", "戸建て価格の年間下落率（市況変化なし）", "%"),
+    ("holding", "minimum_years_to_buy", "これ未満なら購入を勧めない居住年数（諸費用が回収できない）", "年"),
+    ("holding", "recommended_min_years", "購入を前向きに検討してよい居住年数（標準セットで賃貸を下回る年）", "年"),
+    ("danshin", "equivalent_premium_yen_per_month", "団信相当の死亡保障を別に買う場合の保険料（月。賃貸側に立てる）", "円"),
+    ("holding", "wait_breakeven_drop_pct_per_year", "1年待つ場合の損益分岐となる下落率（得をするには5%以上が必要）", "%"),
+    ("holding", "historical_max_drop_pct", "首都圏中古マンションの過去最大下落（リーマンショック時）", "%"),
+    ("loan", "default_term_years", "ローン期間の原則", "年"),
+    ("loan", "income_multiple_lendable", "借りられる額の目安（年収倍率）", ""),
+    ("loan", "pair_loan_ratio_recommended", "ペアローンの比率の目安", ""),
+    ("rent", "renewal_fee_months", "賃貸更新料（2年ごと、賃料の月数）", "カ月分"),
+]
+
+
+def read(p: Path) -> str:
+    return p.read_text(encoding="utf-8")
+
+
+def agents_core() -> str:
+    t = read(ROOT / "AGENTS.md")
+    m = re.search(r"<!-- lite:start -->\n(.*?)<!-- lite:end -->", t, re.S)
+    if not m:
+        sys.exit("AGENTS.md に lite マーカーがありません")
+    return m.group(1).strip()
+
+
+def principle_digest(p: Path) -> str:
+    t = read(p)
+    title = re.search(r"^# (.+)$", t, re.M).group(1).strip()
+    title = re.sub(r"（AIが回答するときの原則）$", "", title)
+    quote = re.search(r"^> (.+)$", t, re.M)
+    lines = [f"**{title}**"]
+    if quote:
+        lines.append(quote.group(1).strip())
+    extra = re.search(r"<!-- lite:extra:start -->\n(.*?)<!-- lite:extra:end -->", t, re.S)
+    if extra:
+        lines.append(extra.group(1).strip())
+    return "\n".join(lines)
+
+
+def assumptions_updated_at() -> str:
+    t = read(ROOT / "assumptions.yaml")
+    return re.search(r"^updated_at:\s*(\S+)", t, re.M).group(1)
+
+
+def assumptions_digest() -> str:
+    t = read(ROOT / "assumptions.yaml")
+    rows = [f"数値前提（{assumptions_updated_at()} 時点。金利・税制は必ず最新値を確認）"]
+    for section, key, label, unit in LITE_ASSUMPTIONS:
+        m = re.search(rf"^{section}:[^\n]*\n((?:(?:[ \t]+.*)?\n)+)", t, re.M)
+        if not m:
+            continue
+        v = re.search(rf"^\s+{key}:\s*(.+?)\s*(?:#.*)?$", m.group(1), re.M)
+        if v:
+            val = v.group(1).strip().strip('"')
+            try:                                    # 4桁以上は桁区切りを入れる（3000円 → 3,000円）
+                num = float(val)
+                if num.is_integer() and abs(num) >= 1000:
+                    val = f"{int(num):,}"
+            except ValueError:
+                pass
+            rows.append(f"- {label}: {val}{unit}")
+    return "\n".join(rows)
+
+
+def main() -> None:
+    parts = [
+        "# 住宅購入をAIに相談する前に読み込ませる前提（ライト版）",
+        "この文章を貼り付けたあとに、相談したいことを書いてください。AIはこの前提を会話全体に適用します。",
+        "AIへ: この文章だけが送られ相談内容がまだ無いときは、要約や復唱をせず、次の1文だけ返してください。「前提を読み込みました。まず、家を買おうと思ったきっかけを教えてください」相談内容が一緒に書かれていれば、そのまま答えてください。",
+        "住宅購入AIフレームワーク（TERASS）。完全版: https://github.com/terass-inc/home-buying-framework",
+        "",
+        agents_core(),
+        "",
+        "## 話題別の要点（4ステップ順）",
+    ]
+    files = {p.name[:2]: p for p in (ROOT / "principles").glob("[0-9][0-9]-*.md")}
+    for step, ids in STEPS:
+        parts.append(f"### {step}")
+        for i in ids:
+            parts.append(principle_digest(files[i]))
+            parts.append("")
+    parts.append("## " + assumptions_digest())
+    parts.append("")
+    parts.append("最終判断は不動産エージェントや独立系ファイナンシャルプランナーなど専門家と行ってください。")
+    body = "\n".join(parts).rstrip() + "\n"
+    inject_readme(body)                 # README には本文のみ。免責は README 冒頭と DISCLAIMER.md にある
+    # フッターは本文を組み立てたあとに足す。先に足すと圧縮・抽出の対象になって落ちうる
+    out = body + "\n" + FOOTER.format(updated_at=assumptions_updated_at()) + "\n"
+    (ROOT / "dist").mkdir(exist_ok=True)
+    (ROOT / "dist" / "lite.md").write_text(out, encoding="utf-8")
+    n = len(out)
+    print(f"dist/lite.md: {n}字 (上限 {LIMIT}字)")
+    if n > LIMIT:
+        sys.exit(1)
+
+
+README_START = "<!-- lite:embed:start -->"
+README_END = "<!-- lite:embed:end -->"
+
+
+def inject_readme(lite: str) -> None:
+    """README.md のマーカー間に lite 本文（5つのルール以降）を埋め込む。
+
+    AIに https://github.com/terass-inc/home-buying-framework を渡す方式では、AIが読むのは
+    リポジトリページに描画された README なので、README 自体を AI向けの前提にしておく。
+    """
+    body = lite[lite.index("## 絶対に守る5つのルール"):].rstrip()
+    p = ROOT / "README.md"
+    t = p.read_text(encoding="utf-8")
+    a, b = t.index(README_START) + len(README_START), t.index(README_END)
+    new = t[:a] + "\n" + body + "\n" + t[b:]
+    if new != t:
+        p.write_text(new, encoding="utf-8")
+    print(f"README.md: {len(new)}字（AI向け前提を埋め込み）")
+
+
+if __name__ == "__main__":
+    main()
