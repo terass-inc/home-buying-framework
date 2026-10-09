@@ -1,0 +1,28 @@
+name: link check
+# README・LP・llms.txt で案内している URL が開けるかを確かめる。
+# 利用者が最初に踏む導線なので、404 を利用者からの報告で知る前に気づけるようにする
+on:
+  push:
+    branches: [main]
+    paths: [README.md, "docs/**", ".github/workflows/link-check.yml"]
+  schedule:
+    - cron: "0 0 * * 1"   # 毎週月曜 9:00（日本時間）
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check raw.githubusercontent.com / github.io URLs
+        run: |
+          urls=$(grep -rhoE "https://(raw\.githubusercontent\.com/terass-inc/home-buying-framework|terass-inc\.github\.io/home-buying-framework)/[^ )\"'<>]*" README.md docs | sort -u)
+          # Pages は push 直後に反映が遅れることがあるので、失敗したら 1 分おいて再試行する
+          fail=0
+          for u in $urls; do
+            code=$(curl -sfL -o /dev/null -w '%{http_code}' --retry 3 --retry-delay 60 --retry-all-errors "$u" || true)
+            echo "$code $u"
+            [ "$code" = "200" ] || fail=1
+          done
+          exit $fail

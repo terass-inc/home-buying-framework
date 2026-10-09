@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from consult import FIELD_INDEX, FIELDS, SURFACE_REASONS, Facts  # noqa: E402
+from consult import FIELDS, SURFACE_REASONS, Facts, question  # noqa: E402
 from paths import ROOT  # noqa: E402
 
 try:  # リポジトリから起動したとき
@@ -142,9 +142,10 @@ def _next_to_learn(f: Facts, provisional: list[str]) -> Optional[dict]:
         order.insert(1, "purpose_sentence_confirmed")
     for k in order:
         if not f.known(k):
-            q, why, _ = FIELD_INDEX[k]
-            extra = "（今は仮置き）" if k == "comparable_rent_yen" and "比較賃料" in provisional else ""
-            return {"field": k, "question": q, "why": why + extra}
+            nq = question(k)
+            if k == "comparable_rent_yen" and "比較賃料" in provisional:
+                nq["why"] += "（今は仮置き）"
+            return nq
     return None
 
 
@@ -248,6 +249,7 @@ def to_markdown(report: dict) -> str:
     if report["まだ出せない結論"]:
         lines += ["## まだ出せない結論"] + [f"- {x}" for x in report["まだ出せない結論"]] + [""]
     if (n := report["次に分かると精度が上がること"]):
-        lines += ["## 次に分かると精度が上がること", f"- {n['question']}（{n['why']}）", ""]
+        lines += ["## 次に分かると精度が上がること", f"- {n['question']}（{n['why']}）",
+                  f"  - 選択肢: {' / '.join(n['options'])}", ""]
     lines += [f"※{DISCLAIMER}", f"※{DISCLOSURE}"]
     return "\n".join(lines)

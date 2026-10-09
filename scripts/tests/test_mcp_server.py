@@ -141,6 +141,17 @@ class TestMcpServer(unittest.TestCase):
         self.assertEqual(d["next_question"]["field"], "purpose_sentence_confirmed")
         self.assertFalse(d["can_conclude"])
 
+    def test_every_question_has_options_ending_with_free_text(self):
+        """質問はすべて押すだけで答えられる選択肢を持ち、最後は自由記述にする。"""
+        import consult  # noqa: PLC0415
+        for k, *_ in consult.FIELDS:
+            opts = consult.question(k)["options"]
+            self.assertGreaterEqual(len(opts), 3, k)          # 選択肢2個以上 + 自由記述
+            self.assertLessEqual(len(opts), 6, k)
+            self.assertEqual(opts[-1], consult.OTHER, k)
+        d = self.data(self.call("next_step", {"topic": "loan_term", "facts": {}}))
+        self.assertEqual(d["next_question"]["options"][-1], consult.OTHER)
+
     def test_bad_principle_id_is_tool_error(self):
         r = self.call("get_principle", {"id": "zz"})
         self.assertTrue(r.is_error)
