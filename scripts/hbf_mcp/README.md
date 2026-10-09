@@ -26,6 +26,19 @@ Claude Desktop では、設定ファイル（`claude_desktop_config.json`）に�
 }
 ```
 
+### URL で追加する（公開後）
+
+サーバーを URL で公開すると、Claude（設定 → コネクタ → カスタムコネクタを追加）、Claude Code（`claude mcp add --transport http home-buying-framework https://<公開URL>/mcp`）、ChatGPT（開発者モードのコネクタ）に、URL を入れるだけで追加できます。
+
+公開用の起動方法は次のとおりです。相談の状態は相談IDそのものに詰めているので、サーバーは何も保存せず、サーバーレスや複数台構成でもそのまま動きます。
+
+```bash
+HBF_ALLOWED_HOSTS=mcp.example.com hbf-mcp --http --host 0.0.0.0 --port 8080   # 待ち受けは /mcp
+docker build -t hbf-mcp . && docker run -e HBF_ALLOWED_HOSTS=mcp.example.com -p 8080:8080 hbf-mcp
+```
+
+`HBF_ALLOWED_HOSTS` には公開するドメインを入れます（DNS リバインディング対策。指定しないとローカルからの接続だけを受け付けます）。
+
 リポジトリを取得済みなら `uv run --with "mcp>=2,<3" python scripts/hbf_mcp/server.py` でも起動できます。
 
 ## 相談の流れ
@@ -66,7 +79,7 @@ self_check(topic=rent_vs_buy, shows_numbers=true)
 
 ほかに、リソース（`framework://lite`、`framework://assumptions`、`framework://principles/{id}`、`framework://cases/{id}`）と、プロンプト（`home_buying_consultation`、`rent_vs_buy_check`、`loan_term_check`）があります。参照と計算の道具には読み取り専用の注釈を付けています。
 
-相談の状態はサーバーのプロセスの中にだけ持ち、外部には送りません。アプリを閉じると消えます。
+相談の状態（分かっている事実）は相談IDに詰めて AI とやりとりし、サーバーには保存しません。
 
 ## テスト
 

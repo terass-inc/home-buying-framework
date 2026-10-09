@@ -11,9 +11,11 @@
 """
 from __future__ import annotations
 
+import base64
+import json
 import re
 import sys
-import uuid
+import zlib
 from dataclasses import asdict, fields
 from pathlib import Path
 from typing import Literal, Optional
@@ -77,7 +79,15 @@ class FactsInput(BaseModel):
 
 
 _FACT_FIELDS = {f.name for f in fields(consult.Facts)} - {"extra"}
-_sessions: dict[str, consult.Facts] = {}
+_TOKEN_PREFIX = "c1."
+
+
+def _encode(f: consult.Facts) -> str:
+    """相談の状態を相談IDそのものに詰める。サーバーは何も保存しない（URLで公開しても、
+    リクエストごとに別のサーバーが応答しても同じ相談を続けられ、利用者の情報がサーバーに残らない）。"""
+    d = {k: v for k, v in asdict(f).items() if k in _FACT_FIELDS and v not in (None, False, "")}
+    raw = zlib.compress(json.dumps(d, ensure_ascii=False, separators=(",", ":")).encode("utf-8"), 9)
+    return _TOKEN_PREFIX + base64.urlsafe_b64encode(raw).decode("ascii").rstrip("=")
 
 
 def _merge(base: consult.Facts, new: Optional[FactsInput]) -> consult.Facts:
@@ -89,33 +99,39 @@ def _merge(base: consult.Facts, new: Optional[FactsInput]) -> consult.Facts:
 
 
 def _session(consultation_id: str) -> consult.Facts:
-    if consultation_id not in _sessions:
-        raise ToolError("その consultation_id の相談はありません。start_consultation で作り直してください")
-    return _sessions[consultation_id]
+    try:
+        if not consultation_id.startswith(_TOKEN_PREFIX):
+            raise ValueError
+        b = consultation_id[len(_TOKEN_PREFIX):]
+        d = json.loads(zlib.decompress(base64.urlsafe_b64decode(b + "=" * (-len(b) % 4))))
+        return consult.Facts(**{k: v for k, v in d.items() if k in _FACT_FIELDS})
+    except Exception as exc:  # noqa: BLE001
+        raise ToolError("consultation_id を読めません。直前に返された consultation_id をそのまま渡すか、"
+                        "start_consultation で作り直してください") from exc
 
 
 def _report(cid: str, f: consult.Facts) -> dict:
     r = report.diagnose(f)
     known = {k: v for k, v in asdict(f).items() if k != "extra" and v not in (None, False, "")}
-    return {"consultation_id": cid, "分かっていること": known, "report": r, "report_markdown": report.to_markdown(r)}
+    return {"consultation_id": cid, "consultation_id_note": "次の呼び出しでは、この consultation_id を使う（更新のたびに変わる）",
+            "分かっていること": known, "report": r, "report_markdown": report.to_markdown(r)}
 
 
 @server.tool(annotations=SESSION, description=(
     "相談を始める。分かっていることがあれば facts に入れる（なくてもよい）。"
-    "相談ID と、今の前提での診断レポート（賃貸か購入か・ローン期間・待つコスト・借りるべき額・購入直後の純資産・"
+    "相談ID（状態を詰めたもの。サーバーは保存しない）と、今の前提での診断レポート（賃貸か購入か・ローン期間・待つコスト・借りるべき額・購入直後の純資産・"
     "結論が変わる条件・次に分かると精度が上がること）を返す。"))
 def start_consultation(facts: Optional[FactsInput] = None) -> dict:
-    cid = uuid.uuid4().hex[:8]
-    _sessions[cid] = _merge(consult.Facts(), facts)
-    return _report(cid, _sessions[cid])
+    f = _merge(consult.Facts(), facts)
+    return _report(_encode(f), f)
 
 
 @server.tool(annotations=SESSION, description=(
     "相談に、新しく分かったことをまとめて足し、診断レポートを更新して返す。"
-    "利用者が1回の発言で複数のことを話したら、全部まとめて渡す。"))
+    "利用者が1回の発言で複数のことを話したら、全部まとめて渡す。返ってきた新しい consultation_id を次から使う。"))
 def update_facts(consultation_id: str, facts: FactsInput) -> dict:
-    _sessions[consultation_id] = _merge(_session(consultation_id), facts)
-    return _report(consultation_id, _sessions[consultation_id])
+    f = _merge(_session(consultation_id), facts)
+    return _report(_encode(f), f)
 
 
 @server.tool(annotations=READ_ONLY, description="相談の今の診断レポートを返す。")
@@ -328,8 +344,33 @@ def loan_term_prompt(loan_amount: str = "", sale_after_years: str = "") -> str:
             "get_framework を読み、利息総額ではなく売却時の残債と手残りで比べてください（loan_term_comparison を使う）。")
 
 
+def http_app(allowed_hosts: Optional[list[str]] = None):
+    """URL で公開するときの ASGI アプリ（/mcp）。状態を持たないので、サーバーレスや複数台でも動く。
+
+    allowed_hosts（または環境変数 HBF_ALLOWED_HOSTS、カンマ区切り）に公開するドメインを入れる。
+    例: HBF_ALLOWED_HOSTS=home-buying-framework.example.com。指定がなければローカル（127.0.0.1・localhost）だけを受け付ける。
+    """
+    import os
+    from mcp.server.transport_security import TransportSecuritySettings
+    hosts = allowed_hosts or [h.strip() for h in os.environ.get("HBF_ALLOWED_HOSTS", "").split(",") if h.strip()]
+    hosts = hosts or ["127.0.0.1", "127.0.0.1:*", "localhost", "localhost:*"]
+    sec = TransportSecuritySettings(enable_dns_rebinding_protection=True, allowed_hosts=hosts,
+                                    allowed_origins=[f"https://{h}" for h in hosts] + [f"http://{h}" for h in hosts])
+    return server.streamable_http_app(stateless_http=True, json_response=True, transport_security=sec)
+
+
 def main() -> None:
-    server.run()
+    import argparse
+    p = argparse.ArgumentParser(description="住宅購入AIフレームワークの MCP サーバー")
+    p.add_argument("--http", action="store_true", help="標準入出力ではなく HTTP（/mcp）で待ち受ける")
+    p.add_argument("--host", default="127.0.0.1")
+    p.add_argument("--port", type=int, default=8000)
+    args = p.parse_args()
+    if args.http:
+        import uvicorn
+        uvicorn.run(http_app(), host=args.host, port=args.port)
+    else:
+        server.run()
 
 
 if __name__ == "__main__":

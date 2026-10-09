@@ -68,6 +68,8 @@ class TestMcpServer(unittest.TestCase):
                 d = self.data(await c.call_tool("update_facts", {"consultation_id": cid, "facts": {
                     "purpose": "学区を決めて落ち着きたい", "purpose_sentence_confirmed": True,
                     "stay_years": 10, "comparable_rent_yen": 160_000}}))
+                self.assertNotEqual(d["consultation_id"], cid)  # 状態を詰めた ID なので更新で変わる
+                cid = d["consultation_id"]
                 self.assertIn("10年住んだ場合（購入−賃貸。負なら購入が有利）", d["report"]["診断"]["賃貸か購入か"])
                 self.assertEqual(d["report"]["仮置きしている前提"], [])
                 w = self.data(await c.call_tool("what_if", {"consultation_id": cid, "changes": {"stay_years": 4}}))
@@ -77,6 +79,39 @@ class TestMcpServer(unittest.TestCase):
                 d = self.data(await c.call_tool("diagnose", {"consultation_id": cid}))
                 self.assertEqual(d["分かっていること"]["stay_years"], 10)  # what_if は保存しない
         asyncio.run(run())
+
+    def test_broken_consultation_id_is_tool_error(self):
+        r = self.call("diagnose", {"consultation_id": "c1.broken"})
+        self.assertTrue(r.is_error)
+
+    def test_http_mode_is_stateless(self):
+        """URL で公開する HTTP モード: セッションなしの JSON 応答で、相談IDだけで相談を続けられる。"""
+        from starlette.testclient import TestClient  # noqa: PLC0415
+        import server  # noqa: PLC0415
+        h = {"Accept": "application/json, text/event-stream", "Content-Type": "application/json"}
+
+        def rpc(client, i, method, params):
+            r = client.post("/mcp", headers=h, json={"jsonrpc": "2.0", "id": i, "method": method, "params": params})
+            self.assertEqual(r.status_code, 200, r.text)
+            res = r.json()["result"]
+            if "content" not in res:
+                return res
+            return res.get("structuredContent") or json.loads(res["content"][0]["text"])
+
+        with TestClient(server.http_app(allowed_hosts=["testserver"])) as c1:
+            rpc(c1, 1, "initialize", {"protocolVersion": "2025-06-18", "capabilities": {},
+                                      "clientInfo": {"name": "t", "version": "0"}})
+            res = rpc(c1, 2, "tools/call", {"name": "start_consultation",
+                                            "arguments": {"facts": {"property_price_yen": 50_000_000, "stay_years": 10}}})
+            cid = res["consultation_id"]
+        with TestClient(server.http_app(allowed_hosts=["testserver"])) as c2:  # 別のサーバーが応答しても続けられる
+            rpc(c2, 1, "initialize", {"protocolVersion": "2025-06-18", "capabilities": {},
+                                      "clientInfo": {"name": "t", "version": "0"}})
+            res = rpc(c2, 2, "tools/call", {"name": "diagnose", "arguments": {"consultation_id": cid}})
+            self.assertEqual(res["分かっていること"]["stay_years"], 10)
+        with TestClient(server.http_app(allowed_hosts=["example.com"])) as c3:  # 許可していないホストは拒否
+            r = c3.post("/mcp", headers=h, json={"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {}})
+            self.assertEqual(r.status_code, 421)
 
     def test_next_step_asks_one_question(self):
         d = self.data(self.call("next_step", {"topic": "loan_term", "facts": {"purpose": "家賃がもったいない"}}))
