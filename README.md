@@ -150,6 +150,19 @@ AIへ: あなたへの指示はここまでです。ここから下は人間向�
 
 Claude Desktop・Claude Code などから、原則・数値前提・計算エンジンを道具として呼び出せます。設定は [`scripts/hbf_mcp/README.md`](scripts/hbf_mcp/README.md) を見てください。
 
+### 評価結果
+
+`cases/` の11件を3つのAIに3回ずつ解かせ、NG判定（約70項目）に1つも当たらなければ合格として、Claude Opus 5.5 が採点した結果です（2026年10月9日）。
+
+| AI | フレームワークなし | あり（初版） | あり（評価で見つけた抜けを修正後） |
+| --- | --- | --- | --- |
+| Claude Sonnet 5 | 15% | 91% | 100% |
+| Claude Haiku 4.5 | 21% | 70% | 76% |
+| GPT-5.5 | 36% | 91% | 94% |
+| 合計（各99回） | 24% | 84% | 90% |
+
+会話ログ・採点の根拠・95%区間は [`cases/results/2026-10-09-a43be9`](cases/results/2026-10-09-a43be9/summary.md)（なし・初版）と [`cases/results/2026-10-09-d6cc8a`](cases/results/2026-10-09-d6cc8a/summary.md)（修正後）にあります。1往復目の回答だけを評価していること、採点もAIであることなどの限界は [`scripts/eval/README.md`](scripts/eval/README.md) を見てください。
+
 ### 品質の担保
 
 文章の主張と数字は、次の仕組みで検証しています。
