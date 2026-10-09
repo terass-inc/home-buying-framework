@@ -1,4 +1,13 @@
 """賃貸 vs 購入の比較計算エンジン（calc/rent-vs-buy.md の実装）。標準ライブラリのみ。"""
+from .advice import (
+    AdviceResult,
+    Figure,
+    balance_sheet,
+    borrowing_budget,
+    loan_term_comparison,
+    selling_costs_breakdown,
+    wait_cost,
+)
 from .assumptions import Assumptions, AssumptionsError, ScenarioSet, load_assumptions
 from .loan import balance_after_months, interest_paid_months, monthly_payment
 from .model import (
@@ -13,6 +22,8 @@ from .model import (
 )
 
 __all__ = [
+    "AdviceResult", "Figure", "balance_sheet", "borrowing_budget", "loan_term_comparison",
+    "selling_costs_breakdown", "wait_cost",
     "Assumptions", "AssumptionsError", "ScenarioSet", "load_assumptions",
     "balance_after_months", "interest_paid_months", "monthly_payment",
     "RentBuyInputs", "RentBuyResult", "RentMove", "YearRow",

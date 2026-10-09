@@ -19,6 +19,8 @@ DEFAULT_PATH = Path(__file__).resolve().parents[2] / "assumptions.yaml"
 
 # selling_costs.brokerage_fee_formula の想定文字列。式を変えたらエンジン側も直す必要があるので照合する
 _BROKERAGE_FORMULA_RE = re.compile(r"^\(売却価格\s*×\s*3%\s*\+\s*6万円\)\s*×\s*1\.1$")
+# loan.income_multiple_lendable の想定書式。数値を取り出して計算に使うので書式が変わったら止める
+_INCOME_MULTIPLE_RE = re.compile(r"^(\d+(?:\.\d+)?)〜(\d+(?:\.\d+)?)倍（最大(\d+(?:\.\d+)?)〜(\d+(?:\.\d+)?)倍）$")
 
 
 class AssumptionsError(ValueError):
@@ -74,6 +76,24 @@ class Assumptions:
     holding_recommended_min_years: int
     wait_breakeven_drop_pct: float
     historical_max_drop_pct: float
+    # --- 以下は advice.py（住宅相談の計算）で使う値 ---
+    screening_rate_pct: float
+    repayment_ratio_limit_pct: float
+    income_multiple_lendable: str        # 原文 "7〜8倍（最大9〜10倍）"
+    income_multiple_range: tuple         # (7, 8, 9, 10) = (目安下限, 目安上限, 最大下限, 最大上限)
+    income_multiple_caution: str
+    income_note: str                     # inflation.income_note（予算は収入据え置きで見る）
+    term_shortening_breakeven: str
+    term_shortening_deduction_note: str
+    prepayment_fee_note: str
+    prepayment_type_note: str
+    prepayment_how_to_mention: str
+    purchase_new_condo_pct: float
+    purchase_used_or_house_pct: float
+    earnest_money_pct: float
+    selling_brokerage_fee_formula: str
+    selling_rate_by_price_note: str
+    selling_excluded: str
 
 
 def _get(tree: Mapping[str, Any], dotted: str):
@@ -97,6 +117,13 @@ def _int(tree, dotted: str) -> int:
     if isinstance(val, bool) or not isinstance(val, int):
         raise AssumptionsError(f"assumptions.yaml の {dotted} が整数ではない: {val!r}")
     return val
+
+
+def _str(tree, dotted: str) -> str:
+    val = _get(tree, dotted)
+    if not isinstance(val, str) or not val.strip():
+        raise AssumptionsError(f"assumptions.yaml の {dotted} が文字列ではない、または空: {val!r}")
+    return val.strip()
 
 
 def parse_assumptions(tree: Mapping[str, Any]) -> Assumptions:
@@ -133,6 +160,14 @@ def parse_assumptions(tree: Mapping[str, Any]) -> Assumptions:
         if not isinstance(mv, Mapping):
             raise AssumptionsError(f"rent.example_moves[{i}] がマッピングではない")
         moves.append((_int({"m": mv}, "m.after_years"), _num({"m": mv}, "m.rent_yen_per_month")))
+
+    multiple_text = _str(tree, "loan.income_multiple_lendable")
+    mm = _INCOME_MULTIPLE_RE.match(multiple_text)
+    if not mm:
+        raise AssumptionsError(
+            "loan.income_multiple_lendable が想定の書式 '7〜8倍（最大9〜10倍）' と違う: "
+            f"{multiple_text!r}。advice.borrowing_budget も合わせて直すこと"
+        )
 
     return Assumptions(
         updated_at=str(_get(tree, "updated_at")),
@@ -174,6 +209,23 @@ def parse_assumptions(tree: Mapping[str, Any]) -> Assumptions:
         holding_recommended_min_years=_int(tree, "holding.recommended_min_years"),
         wait_breakeven_drop_pct=_num(tree, "holding.wait_breakeven_drop_pct_per_year"),
         historical_max_drop_pct=_num(tree, "holding.historical_max_drop_pct"),
+        screening_rate_pct=_num(tree, "interest_rate.screening_rate_pct"),
+        repayment_ratio_limit_pct=_num(tree, "loan.repayment_ratio_limit_pct"),
+        income_multiple_lendable=multiple_text,
+        income_multiple_range=tuple(float(g) for g in mm.groups()),
+        income_multiple_caution=_str(tree, "loan.income_multiple_caution"),
+        income_note=_str(tree, "inflation.income_note"),
+        term_shortening_breakeven=_str(tree, "loan.term_shortening_breakeven"),
+        term_shortening_deduction_note=_str(tree, "loan.term_shortening_deduction_note"),
+        prepayment_fee_note=_str(tree, "loan.prepayment.fee_note"),
+        prepayment_type_note=_str(tree, "loan.prepayment.type_note"),
+        prepayment_how_to_mention=_str(tree, "loan.prepayment.how_to_mention"),
+        purchase_new_condo_pct=_num(tree, "purchase_costs.new_condo_pct"),
+        purchase_used_or_house_pct=_num(tree, "purchase_costs.used_or_house_pct"),
+        earnest_money_pct=_num(tree, "purchase_costs.earnest_money_pct"),
+        selling_brokerage_fee_formula=formula.strip(),
+        selling_rate_by_price_note=_str(tree, "selling_costs.rate_by_price_note"),
+        selling_excluded=_str(tree, "selling_costs.excluded"),
     )
 
 
