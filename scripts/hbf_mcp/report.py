@@ -26,6 +26,7 @@ DISCLAIMER = ("この試算は一般的な前提に基づく概算です。金�
 DISCLOSURE = "この前提は不動産仲介会社の株式会社TERASSが作成したもので、不動産事業者の立場から書かれている。"
 PROVISIONAL_RENT_PCT = 3.8          # 比較賃料が不明なときの仮置き（物件価格の年3.8%）
 YEARS_GRID = (3, 5, 7, 10, 15, 20)
+HORIZON_YEARS = 50            # 受け付ける居住年数の上限（server.FactsInput の stay_years）と合わせる
 SCENARIOS = {"low": "低（物価0%・金利1.0%）", "medium": "中（物価1.0%・金利1.5%）", "high": "高（物価2.0%・金利2.5%）"}
 
 
@@ -65,7 +66,7 @@ def _rent(f: Facts) -> Optional[float]:
 
 
 def _sim(a, f: Facts, scenario: str, **over):
-    kw = dict(price_yen=f.property_price_yen, rent_yen_per_month=_rent(f), horizon_years=40)
+    kw = dict(price_yen=f.property_price_yen, rent_yen_per_month=_rent(f), horizon_years=HORIZON_YEARS)
     if f.interest_rate_pct and scenario == "medium":
         kw["interest_rate_pct"] = f.interest_rate_pct
     kw.update(over)
@@ -156,7 +157,8 @@ def diagnose(f: Facts) -> dict:
     rate = f.interest_rate_pct or inputs_from_assumptions(a, scenario="medium").interest_rate_pct
     if f.property_price_yen:
         lt = advice.loan_term_comparison(f.property_price_yen, annual_rate_pct=rate,
-                                         sale_year=int(f.stay_years) if f.stay_years else None,
+                                         # 35年を超えて住むなら完済後なので、売却時点の比較はしない
+                                         sale_year=int(f.stay_years) if f.stay_years and f.stay_years <= 35 else None,
                                          annual_income_yen=f.household_income_yen, assumptions=a)
         sections["ローン期間（35年と20年）"] = {"要約": lt.summary, "注意": lt.notes[:3]}
     if f.property_price_yen and f.current_rent_yen:

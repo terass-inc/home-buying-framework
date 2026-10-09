@@ -2,7 +2,7 @@
 # リポジトリの文章（principles/・cases/・calc/・assumptions.yaml・dist/lite.md）を同梱し、
 # クローンしなくても同じ前提・同じ計算で動くようにする。
 [build-system]
-requires = ["hatchling>=1.25"]
+requires = ["hatchling==1.32.4"]
 build-backend = "hatchling.build"
 
 [project]
@@ -13,7 +13,7 @@ readme = "scripts/hbf_mcp/README.md"
 requires-python = ">=3.10"
 license = { text = "MIT (code) / CC BY-SA 4.0 (framework text)" }
 authors = [{ name = "TERASS, Inc." }]
-dependencies = ["mcp>=2,<3"]
+dependencies = ["mcp>=2.3,<3"]
 
 [project.urls]
 Homepage = "https://terass-inc.github.io/home-buying-framework/"

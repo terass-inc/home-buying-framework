@@ -1,0 +1,12 @@
+# 依存のセキュリティ更新を自動で PR にする
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /scripts/hbf_mcp
+    schedule: { interval: weekly }
+  - package-ecosystem: pip
+    directory: /scripts/eval
+    schedule: { interval: monthly }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: monthly }
