@@ -20,7 +20,7 @@ jobs:
       GH_REPO: ${{ github.repository }}
       LABEL: review-reminder
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: ラベルを用意する
         run: gh label create "$LABEL" --color FBCA04 --description "数値前提の定期見直し" --force
