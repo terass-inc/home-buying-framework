@@ -133,10 +133,60 @@ def main() -> None:
     out = body + "\n" + FOOTER.format(updated_at=assumptions_updated_at()) + "\n"
     (ROOT / "dist").mkdir(exist_ok=True)
     (ROOT / "dist" / "lite.md").write_text(out, encoding="utf-8")
+    write_llms_txt(out)
     n = len(out)
     print(f"dist/lite.md: {n}字 (上限 {LIMIT}字)")
     if n > LIMIT:
         sys.exit(1)
+
+
+RAW = "https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/"
+
+
+def write_llms_txt(lite: str) -> None:
+    """LP（GitHub Pages）の直下に llms.txt と llms-full.txt を置く（https://llmstxt.org/ の形式）。
+
+    llms-full.txt は lite.md と同じ内容。raw.githubusercontent.com を開けないAIでも、
+    github.io なら開けることがあるため、取得先を増やしておく意味もある。
+    """
+    docs = ROOT / "docs"
+    (docs / "llms-full.txt").write_text(lite, encoding="utf-8")
+    rows = []
+    for f in sorted((ROOT / "principles").glob("[0-9][0-9]-*.md")):
+        title = re.search(r"^# (.+)$", read(f), re.M).group(1)
+        title = re.sub(r"（AIが回答するときの原則）$", "", title).strip()
+        rows.append(f"- [{title}]({RAW}{f.relative_to(ROOT).as_posix()})")
+    calc = [f"- [{re.search(r'^# (.+)$', read(f), re.M).group(1).strip()}]({RAW}{f.relative_to(ROOT).as_posix()})"
+            for f in sorted((ROOT / "calc").glob("*.md"))]
+    text = "\n".join([
+        "# 住宅購入AIフレームワーク",
+        "",
+        "> 生成AIが住宅購入・住宅ローン・賃貸か購入かの相談に答えるときに、極端に誤った結論を出さないための判断ルール集。"
+        "不動産仲介会社の株式会社TERASSが作成（CC BY-SA 4.0）。一般的な考え方であり、個別の助言ではない。",
+        "",
+        "相談に答える前に、まず全体の前提（llms-full.txt または AGENTS.md）を読むこと。話題別の詳細は下の各原則にある。",
+        "",
+        "## 前提",
+        "",
+        "- [AIへの前提（全文・7,000字以内）](llms-full.txt): 5つのルール、確認事項、進め方、数値前提。最初に読む",
+        f"- [AGENTS.md]({RAW}AGENTS.md): 完全版の指示書",
+        f"- [数値前提]({RAW}assumptions.yaml): 金利・物価・賃料・諸費用の既定値（YAML）",
+        "",
+        "## 話題別の原則",
+        "",
+        *rows,
+        "",
+        "## 計算手順",
+        "",
+        *calc,
+        "",
+        "## Optional",
+        "",
+        f"- [テストケース]({RAW}cases/README.md): 質問・期待する回答・NG判定",
+        f"- [免責事項]({RAW}DISCLAIMER.md)",
+        "",
+    ])
+    (docs / "llms.txt").write_text(text, encoding="utf-8")
 
 
 README_START = "<!-- lite:embed:start -->"
