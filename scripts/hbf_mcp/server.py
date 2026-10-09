@@ -18,7 +18,7 @@ import sys
 import zlib
 from dataclasses import asdict, fields
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Annotated, Literal, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -86,6 +86,15 @@ async def usage_log(ctx, call_next):
             }, ensure_ascii=False), flush=True)
 
 
+# ---- 入力の範囲（公開サーバーなので、現実にありえない値で計算させない） --------------------------
+Yen = Annotated[int, Field(ge=0, le=10_000_000_000, description="円（0〜100億円）")]
+PriceYen = Annotated[int, Field(ge=1_000_000, le=10_000_000_000, description="円（100万〜100億円）")]
+MonthlyYen = Annotated[int, Field(ge=10_000, le=10_000_000, description="円/月（1万〜1,000万円）")]
+Years = Annotated[int, Field(ge=1, le=50, description="年（1〜50）")]
+RatePct = Annotated[float, Field(ge=0, le=15, description="%（0〜15）")]
+SharePct = Annotated[float, Field(ge=0, le=100, description="%（0〜100）")]
+
+
 READ_ONLY = ToolAnnotations(readOnlyHint=True, idempotentHint=True, openWorldHint=False)
 SESSION = ToolAnnotations(readOnlyHint=False, idempotentHint=False, openWorldHint=False)
 Topic = Literal[tuple(consult.TOPICS)]  # type: ignore[valid-type]
@@ -114,16 +123,16 @@ class FactsInput(BaseModel):
     """相談で分かったこと。分かったものだけ渡せばよい（渡さない項目は変えない）。金額は円。"""
     purpose: Optional[str] = Field(None, max_length=500, description="家を買おうと思ったきっかけ・理由（利用者の言葉のまま、500字以内）")
     purpose_sentence_confirmed: Optional[bool] = Field(None, description="「〇〇のための家」と1文で確認できたか")
-    stay_years: Optional[float] = Field(None, description="何年住む予定か（売却・住み替えまでの年数）")
-    household_income_yen: Optional[int] = Field(None, description="世帯年収（円）")
-    savings_yen: Optional[int] = Field(None, description="購入後も手元に残せる現預金（円）")
-    current_rent_yen: Optional[int] = Field(None, description="今の家賃（円/月）。比較の賃料には使わない")
-    property_price_yen: Optional[int] = Field(None, description="検討している物件の価格（円）")
-    property_age_years: Optional[float] = Field(None, description="築年数")
-    comparable_rent_yen: Optional[int] = Field(None, description="検討物件と同等の物件の募集賃料の相場（円/月）")
+    stay_years: Optional[float] = Field(None, ge=1, le=50, description="何年住む予定か（売却・住み替えまでの年数）")
+    household_income_yen: Optional[int] = Field(None, ge=0, le=10_000_000_000, description="世帯年収（円）")
+    savings_yen: Optional[int] = Field(None, ge=0, le=10_000_000_000, description="購入後も手元に残せる現預金（円）")
+    current_rent_yen: Optional[int] = Field(None, ge=10_000, le=10_000_000, description="今の家賃（円/月）。比較の賃料には使わない")
+    property_price_yen: Optional[int] = Field(None, ge=1_000_000, le=10_000_000_000, description="検討している物件の価格（円）")
+    property_age_years: Optional[float] = Field(None, ge=0, le=150, description="築年数")
+    comparable_rent_yen: Optional[int] = Field(None, ge=10_000, le=10_000_000, description="検討物件と同等の物件の募集賃料の相場（円/月）")
     rent_moves_known: Optional[bool] = Field(None, description="賃貸を続ける場合の住み替え予定を確認したか")
     rate_type: Optional[Literal["fixed", "variable"]] = Field(None, description="金利タイプ")
-    interest_rate_pct: Optional[float] = Field(None, description="適用金利（%）")
+    interest_rate_pct: Optional[float] = Field(None, ge=0, le=15, description="適用金利（%）")
     family_plan_known: Optional[bool] = Field(None, description="家族構成の変化・教育や介護の支出を確認したか")
     existing_insurance_known: Optional[bool] = Field(None, description="医療・がん・就業不能保険の加入状況を確認したか")
 
@@ -189,20 +198,20 @@ def start_consultation(facts: Optional[FactsInput] = None) -> dict:
 @server.tool(annotations=SESSION, description=(
     "相談に、新しく分かったことをまとめて足し、診断レポートを更新して返す。"
     "利用者が1回の発言で複数のことを話したら、全部まとめて渡す。返ってきた新しい consultation_id を次から使う。"))
-def update_facts(consultation_id: str, facts: FactsInput) -> dict:
+def update_facts(consultation_id: Annotated[str, Field(max_length=4_100)], facts: FactsInput) -> dict:
     f = _merge(_session(consultation_id), facts)
     return _report(_encode(f), f)
 
 
 @server.tool(annotations=READ_ONLY, description="相談の今の診断レポートを返す。")
-def diagnose(consultation_id: str) -> dict:
+def diagnose(consultation_id: Annotated[str, Field(max_length=4_100)]) -> dict:
     return _report(consultation_id, _session(consultation_id))
 
 
 @server.tool(annotations=READ_ONLY, description=(
     "前提を一時的に変えたらどうなるかを試す（保存しない）。例: 居住年数を5年にしたら、変動金利なら、"
     "比較賃料が18万円なら。主な数字（損益分岐年・居住年数時点の差・毎月返済）の変化と、変更後の結論が変わる条件を返す。"))
-def what_if(consultation_id: str, changes: FactsInput) -> dict:
+def what_if(consultation_id: Annotated[str, Field(max_length=4_100)], changes: FactsInput) -> dict:
     f = _session(consultation_id)
     ch = {k: v for k, v in changes.model_dump().items() if v is not None and k in _FACT_FIELDS}
     if not ch:
@@ -252,7 +261,7 @@ def list_principles() -> list[dict]:
 
 
 @server.tool(annotations=READ_ONLY, description="話題別の原則の本文（判断手順・アンチパターン・断り方）。id は list_principles の ID（例: '02'）。")
-def get_principle(id: str) -> str:
+def get_principle(id: Annotated[str, Field(max_length=4)]) -> str:
     files = _principles()
     if id not in files:
         raise ToolError(f"id は {sorted(files)} のどれか")
@@ -260,7 +269,7 @@ def get_principle(id: str) -> str:
 
 
 @server.tool(annotations=READ_ONLY, description="数値前提（assumptions.yaml）。section を指定するとその節だけ。コメントの注意も読む。「見直し要」は最新値の確認が必要。")
-def get_assumptions(section: Optional[str] = None) -> str:
+def get_assumptions(section: Optional[Annotated[str, Field(max_length=64)]] = None) -> str:
     text = _read("assumptions.yaml")
     if not section:
         return text
@@ -275,9 +284,9 @@ def get_assumptions(section: Optional[str] = None) -> str:
 @server.tool(annotations=READ_ONLY, description=(
     "賃貸か購入かを、売却時の手残りまで含めた純負担で比べる（calc/rent-vs-buy.md）。"
     "rent_yen_per_month は今の家賃ではなく同等物件の相場。低・中・高セットと波及率0%の分岐年も返す。"))
-def compare_rent_vs_buy(price_yen: int, rent_yen_per_month: int, stay_years: int,
+def compare_rent_vs_buy(price_yen: PriceYen, rent_yen_per_month: MonthlyYen, stay_years: Years,
                         scenario: Literal["low", "medium", "high"] = "medium",
-                        interest_rate_pct: Optional[float] = None, price_pass_through_pct: float = 100.0,
+                        interest_rate_pct: Optional[RatePct] = None, price_pass_through_pct: SharePct = 100.0,
                         depreciation: Literal["small", "medium", "large"] = "medium",
                         include_danshin: bool = True) -> dict:
     a = load_assumptions(ROOT / "assumptions.yaml")
@@ -307,7 +316,7 @@ def compare_rent_vs_buy(price_yen: int, rent_yen_per_month: int, stay_years: int
 
 
 @server.tool(annotations=READ_ONLY, description="元利均等の毎月返済額、完済までの利息、sell_after_years 年後の残債とそれまでの利息。")
-def loan_schedule(principal_yen: int, interest_rate_pct: float, term_years: int, sell_after_years: Optional[int] = None) -> dict:
+def loan_schedule(principal_yen: PriceYen, interest_rate_pct: RatePct, term_years: Years, sell_after_years: Optional[Years] = None) -> dict:
     out = {"毎月の返済_円": round(monthly_payment(principal_yen, interest_rate_pct, term_years)),
            "完済までの利息総額_万円": round(interest_paid_months(principal_yen, interest_rate_pct, term_years, term_years * 12) / 10_000)}
     if sell_after_years:
@@ -320,25 +329,26 @@ def loan_schedule(principal_yen: int, interest_rate_pct: float, term_years: int,
 
 @server.tool(annotations=READ_ONLY, description=(
     "ローン期間の比較（principles/02）。毎月返済・総利息・売却時点の残債と正味の差・差額の使い道・審査金利での返済比率。"))
-def loan_term_comparison(principal_yen: int, annual_rate_pct: Optional[float] = None, short_term_years: int = 20,
-                         long_term_years: Optional[int] = None, sale_year: Optional[int] = None,
-                         investment_yield_pct: Optional[float] = None, annual_income_yen: Optional[int] = None) -> dict:
+def loan_term_comparison(principal_yen: PriceYen, annual_rate_pct: Optional[RatePct] = None, short_term_years: Years = 20,
+                         long_term_years: Optional[Years] = None, sale_year: Optional[Years] = None,
+                         investment_yield_pct: Optional[RatePct] = None, annual_income_yen: Optional[Yen] = None) -> dict:
     return advice.loan_term_comparison(principal_yen, annual_rate_pct=annual_rate_pct, short_term_years=short_term_years,
                                        long_term_years=long_term_years, sale_year=sale_year,
                                        investment_yield_pct=investment_yield_pct, annual_income_yen=annual_income_yen).to_dict()
 
 
 @server.tool(annotations=READ_ONLY, description="待つコスト（principles/01・04）。待って得をするための損益分岐下落率と、過去の下落実績との比較。")
-def wait_cost(property_price_yen: int, monthly_rent_yen: int, wait_years: float = 1) -> dict:
+def wait_cost(property_price_yen: PriceYen, monthly_rent_yen: MonthlyYen,
+              wait_years: Annotated[float, Field(gt=0, le=10)] = 1) -> dict:
     return advice.wait_cost(property_price_yen, monthly_rent_yen, wait_years=wait_years).to_dict()
 
 
 @server.tool(annotations=READ_ONLY, description=(
     "借りられる額（銀行の上限）と借りるべき額（principles/03）を分けて返す。借りるべき額は式で決めず、確認すべき値を返す。"))
-def borrowing_budget(annual_income_yen: int, property_price_yen: Optional[int] = None,
+def borrowing_budget(annual_income_yen: Annotated[int, Field(ge=1_000_000, le=10_000_000_000)], property_price_yen: Optional[PriceYen] = None,
                      property_type: Optional[Literal["new_condo", "used_or_house"]] = None,
-                     other_debt_annual_payment_yen: int = 0, affordable_monthly_payment_yen: Optional[int] = None,
-                     stress_rate_pct: Optional[float] = None) -> dict:
+                     other_debt_annual_payment_yen: Yen = 0, affordable_monthly_payment_yen: Optional[MonthlyYen] = None,
+                     stress_rate_pct: Optional[RatePct] = None) -> dict:
     return advice.borrowing_budget(annual_income_yen, property_price_yen=property_price_yen, property_type=property_type,
                                    other_debt_annual_payment_yen=other_debt_annual_payment_yen,
                                    affordable_monthly_payment_yen=affordable_monthly_payment_yen,
@@ -346,16 +356,16 @@ def borrowing_budget(annual_income_yen: int, property_price_yen: Optional[int] =
 
 
 @server.tool(annotations=READ_ONLY, description="住宅購入のバランスシート（calc/balance-sheet.md）。購入直後と N 年後の資産・負債・純資産。")
-def balance_sheet(property_price_yen: int, savings_yen: int = 4_000_000, securities_yen: int = 1_000_000,
-                  other_assets_yen: int = 1_000_000, term_years: int = 35, annual_rate_pct: Optional[float] = None,
-                  target_year: int = 20) -> dict:
+def balance_sheet(property_price_yen: PriceYen, savings_yen: Yen = 4_000_000, securities_yen: Yen = 1_000_000,
+                  other_assets_yen: Yen = 1_000_000, term_years: Years = 35, annual_rate_pct: Optional[RatePct] = None,
+                  target_year: Years = 20) -> dict:
     return advice.balance_sheet(property_price_yen=property_price_yen, savings_yen=savings_yen, securities_yen=securities_yen,
                                 other_assets_yen=other_assets_yen, term_years=term_years, annual_rate_pct=annual_rate_pct,
                                 target_year=target_year).to_dict()
 
 
 @server.tool(annotations=READ_ONLY, description="売却諸費用の内訳（仲介手数料・その他費用・合計・率）。")
-def selling_costs_breakdown(sale_price_yen: int) -> dict:
+def selling_costs_breakdown(sale_price_yen: PriceYen) -> dict:
     return advice.selling_costs_breakdown(sale_price_yen).to_dict()
 
 
@@ -417,8 +427,10 @@ def http_app(allowed_hosts: Optional[list[str]] = None):
     sec = TransportSecuritySettings(enable_dns_rebinding_protection=True, allowed_hosts=hosts,
                                     allowed_origins=[f"https://{h}" for h in hosts] + [f"http://{h}" for h in hosts])
     path = os.environ.get("HBF_MCP_PATH", "/mcp")  # terass.house では /mcp/home-buying
-    return server.streamable_http_app(streamable_http_path=path, stateless_http=True, json_response=True,
-                                      transport_security=sec)
+    from http_guard import HttpGuard
+    app = server.streamable_http_app(streamable_http_path=path, stateless_http=True, json_response=True,
+                                     transport_security=sec, max_request_body_size=64 * 1024)
+    return HttpGuard(app, path)
 
 
 def main() -> None:

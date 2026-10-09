@@ -3,6 +3,8 @@ on:
   pull_request:
   push:
     branches: [main]
+permissions:
+  contents: read
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -28,3 +30,7 @@ jobs:
           pip wheel . --no-deps -w /tmp/wheel
           python3 -m venv /tmp/hbf && /tmp/hbf/bin/pip install /tmp/wheel/*.whl
           cd /tmp && /tmp/hbf/bin/python -I -c "import hbf_mcp.server as s, hbf_mcp.paths as p; assert '_data' in str(p.ROOT); print(s.report.to_markdown(s.report.diagnose(s.consult.Facts(property_price_yen=50_000_000)))[:200])"
+      - name: Audit pinned dependencies for known vulnerabilities
+        run: |
+          pip install pip-audit
+          pip-audit -r scripts/hbf_mcp/requirements.txt -r scripts/eval/requirements.txt
