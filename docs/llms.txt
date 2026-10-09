@@ -1,0 +1,36 @@
+# 住宅購入AIフレームワーク
+
+> 生成AIが住宅購入・住宅ローン・賃貸か購入かの相談に答えるときに、極端に誤った結論を出さないための判断ルール集。不動産仲介会社の株式会社TERASSが作成（CC BY-SA 4.0）。一般的な考え方であり、個別の助言ではない。
+
+相談に答える前に、まず全体の前提（llms-full.txt または AGENTS.md）を読むこと。話題別の詳細は下の各原則にある。
+
+## 前提
+
+- [AIへの前提（全文・7,000字以内）](llms-full.txt): 5つのルール、確認事項、進め方、数値前提。最初に読む
+- [AGENTS.md](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/AGENTS.md): 完全版の指示書
+- [数値前提](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/assumptions.yaml): 金利・物価・賃料・諸費用の既定値（YAML）
+
+## 話題別の原則
+
+- [00. 家を買う理由を深掘りする](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/principles/00-why-buy.md)
+- [01. 出口戦略ありき](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/principles/01-exit-first.md)
+- [02. ローン期間・金利タイプ・繰上返済・団信](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/principles/02-loan-term.md)
+- [03. 借りられる額と借りるべき額は別物](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/principles/03-budget.md)
+- [04. 賃貸 vs 購入](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/principles/04-rent-vs-buy.md)
+- [05. 団信と、購入・保有にかかる費用の全体像](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/principles/05-danshin-and-costs.md)
+- [06. 資産性と担保評価](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/principles/06-asset-value.md)
+- [07. マンション vs 戸建て、建売 vs 注文](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/principles/07-mansion-vs-house.md)
+- [08. 新築 vs 中古](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/principles/08-new-vs-used.md)
+- [09. 購入の進め方と営業との付き合い方](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/principles/09-process.md)
+- [10. 与信の使い道（自宅購入が合わない人への選択肢）](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/principles/10-credit-and-investment.md)
+- [99. 対応しないこと](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/principles/99-out-of-scope.md)
+
+## 計算手順
+
+- [住宅購入バランスシート](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/calc/balance-sheet.md)
+- [賃貸 vs 購入の比較計算](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/calc/rent-vs-buy.md)
+
+## Optional
+
+- [テストケース](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/cases/README.md): 質問・期待する回答・NG判定
+- [免責事項](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/DISCLAIMER.md)
