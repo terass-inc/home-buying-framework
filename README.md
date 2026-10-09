@@ -148,7 +148,7 @@ AIへ: あなたへの指示はここまでです。ここから下は人間向�
 
 ### MCP サーバーとして使う
 
-Claude Desktop・Claude Code などから、原則・数値前提・計算エンジンを道具として呼び出せます。設定は [`scripts/hbf_mcp/README.md`](scripts/hbf_mcp/README.md) を見てください。
+Claude Code・Claude Desktop などから使えます。相談の状態を覚え、分かったことが増えるたびに賃貸か購入か・ローン期間・待つコスト・借りるべき額をまとめた診断レポートを返します。1行で登録できます（`claude mcp add home-buying-framework -- uvx --from git+https://github.com/terass-inc/home-buying-framework hbf-mcp`）。詳しくは [`scripts/hbf_mcp/README.md`](scripts/hbf_mcp/README.md) を見てください。
 
 ### 評価結果
 

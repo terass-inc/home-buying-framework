@@ -1,0 +1,42 @@
+# MCP サーバーを `uvx` などで1行で起動できるようにするためのパッケージ定義。
+# リポジトリの文章（principles/・cases/・calc/・assumptions.yaml・dist/lite.md）を同梱し、
+# クローンしなくても同じ前提・同じ計算で動くようにする。
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "home-buying-framework-mcp"
+version = "0.2.0"
+description = "住宅購入AIフレームワークの MCP サーバー（原則・数値前提・計算エンジン・相談のガードレール）"
+readme = "scripts/hbf_mcp/README.md"
+requires-python = ">=3.10"
+license = { text = "MIT (code) / CC BY-SA 4.0 (framework text)" }
+authors = [{ name = "TERASS, Inc." }]
+dependencies = ["mcp>=2,<3"]
+
+[project.urls]
+Homepage = "https://terass-inc.github.io/home-buying-framework/"
+Repository = "https://github.com/terass-inc/home-buying-framework"
+
+[project.scripts]
+hbf-mcp = "hbf_mcp.server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["scripts/rentbuy", "scripts/hbf_mcp"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"AGENTS.md" = "hbf_mcp/_data/AGENTS.md"
+"assumptions.yaml" = "hbf_mcp/_data/assumptions.yaml"
+"dist/lite.md" = "hbf_mcp/_data/dist/lite.md"
+"principles" = "hbf_mcp/_data/principles"
+"cases" = "hbf_mcp/_data/cases"
+"calc" = "hbf_mcp/_data/calc"
+"scripts/eval/case_parser.py" = "hbf_mcp/_data/scripts/eval/case_parser.py"
+"LICENSE" = "hbf_mcp/_data/LICENSE"
+"scripts/LICENSE" = "hbf_mcp/_data/scripts/LICENSE"
+
+[tool.hatch.build.targets.sdist]
+include = ["AGENTS.md", "assumptions.yaml", "dist/lite.md", "principles", "cases", "calc",
+           "scripts/rentbuy", "scripts/hbf_mcp", "scripts/eval/case_parser.py", "LICENSE", "scripts/LICENSE"]
+exclude = ["cases/results"]
