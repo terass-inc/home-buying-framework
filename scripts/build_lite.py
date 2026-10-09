@@ -48,7 +48,7 @@ LITE_ASSUMPTIONS = [
     ("holding", "recommended_min_years", "購入を前向きに検討してよい居住年数（標準セットで賃貸を下回る年）", "年"),
     ("danshin", "equivalent_premium_yen_per_month", "団信相当の死亡保障を別に買う場合の保険料（月。賃貸側に立てる）", "円"),
     ("holding", "wait_breakeven_drop_pct_per_year", "1年待つ場合の損益分岐となる下落率（得をするには5%以上が必要）", "%"),
-    ("holding", "historical_max_drop_pct", "首都圏中古マンションの過去最大下落（リーマンショック時）", "%"),
+    ("holding", "historical_max_drop_pct", "首都圏中古マンションの過去最大下落（リーマンショック時、2008年5月→2009年4月。示すときは期間と統計の出典を添える）", "%"),
     ("loan", "default_term_years", "ローン期間の原則", "年"),
     ("loan", "income_multiple_lendable", "借りられる額の目安（年収倍率）", ""),
     ("loan", "pair_loan_ratio_recommended", "ペアローンの比率の目安", ""),
