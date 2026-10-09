@@ -113,6 +113,21 @@ class TestMcpServer(unittest.TestCase):
             r = c3.post("/mcp", headers=h, json={"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {}})
             self.assertEqual(r.status_code, 421)
 
+    def test_usage_log_has_no_consultation_content(self):
+        """計測ログ: 道具の名前と成否は残すが、相談の中身（年収などの値、consultation_id）は残さない。"""
+        import contextlib, io  # noqa: E401, PLC0415
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            ok = self.call("start_consultation", {"facts": {"household_income_yen": 12_345_678, "property_price_yen": 50_000_000}})
+            self.call("get_principle", {"id": "zz"})
+        lines = [json.loads(x) for x in buf.getvalue().splitlines() if '"hbf_mcp_request"' in x]
+        calls = {x["tool"]: x for x in lines if x["method"] == "tools/call"}
+        self.assertTrue(calls["start_consultation"]["ok"])
+        self.assertFalse(calls["get_principle"]["ok"])
+        cid = self.data(ok)["consultation_id"]
+        self.assertNotIn("12345678", buf.getvalue())
+        self.assertNotIn(cid, buf.getvalue())
+
     def test_next_step_asks_one_question(self):
         d = self.data(self.call("next_step", {"topic": "loan_term", "facts": {"purpose": "家賃がもったいない"}}))
         self.assertEqual(d["next_question"]["field"], "purpose_sentence_confirmed")

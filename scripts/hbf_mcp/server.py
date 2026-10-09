@@ -37,6 +37,55 @@ try:
 except ImportError:
     from rentbuy import balance_after_months, interest_paid_months, monthly_payment  # type: ignore
 
+def _client_name(ctx) -> Optional[str]:
+    for path in (("connection", "client_info", "name"), ("session", "client_params", "clientInfo", "name")):
+        obj = ctx
+        try:
+            for a in path:
+                obj = getattr(obj, a)
+            if obj:
+                return str(obj)
+        except Exception:  # noqa: BLE001
+            continue
+    return None
+
+
+async def usage_log(ctx, call_next):
+    """計測用のログ。1回の呼び出しにつき1行の JSON を標準出力へ出す（Cloud Logging がそのまま集計できる形）。
+
+    記録するのは、メソッド・道具の名前・AIアプリの名前・User-Agent・成否・処理時間だけ。
+    相談の中身（引数の値、consultation_id）は記録しない。
+    """
+    import time
+    t0, ok = time.perf_counter(), True
+    try:
+        result = await call_next(ctx)
+        is_err = getattr(result, "isError", None) or getattr(result, "is_error", None)
+        if is_err is None and isinstance(result, dict):
+            is_err = result.get("isError")
+        ok = not is_err
+        return result
+    except Exception:
+        ok = False
+        raise
+    finally:
+        method = getattr(ctx, "method", None)
+        if method and method != "notifications/initialized":
+            params = getattr(ctx, "params", None) or {}
+            headers = {}
+            try:
+                headers = dict(getattr(ctx, "headers", None) or {})
+            except Exception:  # noqa: BLE001
+                pass
+            client = (params.get("clientInfo") or {}).get("name") if method == "initialize" else _client_name(ctx)
+            print(json.dumps({
+                "event": "hbf_mcp_request", "method": method,
+                "tool": params.get("name") if method == "tools/call" else None,
+                "client": client, "user_agent": headers.get("user-agent"),
+                "ok": ok, "ms": round((time.perf_counter() - t0) * 1000),
+            }, ensure_ascii=False), flush=True)
+
+
 READ_ONLY = ToolAnnotations(readOnlyHint=True, idempotentHint=True, openWorldHint=False)
 SESSION = ToolAnnotations(readOnlyHint=False, idempotentHint=False, openWorldHint=False)
 Topic = Literal[tuple(consult.TOPICS)]  # type: ignore[valid-type]
@@ -55,6 +104,7 @@ server = MCPServer(
         "作成は不動産仲介会社の株式会社TERASSであり、利用者にはその立場を伝える。"
     ),
     website_url="https://terass-inc.github.io/home-buying-framework/",
+    middleware=[usage_log],
 )
 
 
@@ -356,7 +406,9 @@ def http_app(allowed_hosts: Optional[list[str]] = None):
     hosts = hosts or ["127.0.0.1", "127.0.0.1:*", "localhost", "localhost:*"]
     sec = TransportSecuritySettings(enable_dns_rebinding_protection=True, allowed_hosts=hosts,
                                     allowed_origins=[f"https://{h}" for h in hosts] + [f"http://{h}" for h in hosts])
-    return server.streamable_http_app(stateless_http=True, json_response=True, transport_security=sec)
+    path = os.environ.get("HBF_MCP_PATH", "/mcp")  # terass.house では /mcp/home-buying
+    return server.streamable_http_app(streamable_http_path=path, stateless_http=True, json_response=True,
+                                      transport_security=sec)
 
 
 def main() -> None:
