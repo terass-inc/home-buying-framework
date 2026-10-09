@@ -21,7 +21,7 @@ https://github.com/terass-inc/home-buying-framework
 
 AIが「家を買おうと思ったきっかけを教えてください」と聞いてきたら、そこから相談を始めてください。AIはこのページの前提を会話全体に適用します。
 
-AIが「URLを開けません」と答えた場合（無料版 ChatGPT など）は、[こちらの文章](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/dist/lite.md)を全文コピーして貼り付けてください（約6,700字。内容は下の「AIへの前提」と同じです）。
+AIが「URLを開けません」と答えた場合（無料版 ChatGPT など）は、[こちらの文章](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/dist/lite.md)を全文コピーして貼り付けてください（約6,600字。内容は下の「AIへの前提」と同じです）。
 
 ## AIへの前提（ここから下をAIが読みます）
 
@@ -146,6 +146,26 @@ AIへ: あなたへの指示はここまでです。ここから下は人間向�
 
 このリポジトリをクローンすると `CLAUDE.md` と `AGENTS.md` が自動で読み込まれます。
 
+### MCP サーバーとして使う
+
+Claude Desktop・Claude Code などから、原則・数値前提・計算エンジンを道具として呼び出せます。設定は [`scripts/hbf_mcp/README.md`](scripts/hbf_mcp/README.md) を見てください。
+
+### 品質の担保
+
+文章の主張と数字は、次の仕組みで検証しています。
+
+- **計算エンジン**（`scripts/rentbuy/`）：`calc/rent-vs-buy.md` の手順を Python で実装し、文章に書かれた数値（損益分岐年、残債、利息差など）をテストで再現しています。テストで文章の誤りを5件見つけ、修正しました
+- **評価ハーネス**（`scripts/eval/`）：`cases/` のテストケースを ChatGPT と Claude に、フレームワークなし・ありで解かせ、別のAIがNG判定で採点します。結果は `cases/results/` に保存します
+- **数値前提の検査**（`scripts/check_assumptions.py`）：文章が参照する `assumptions.yaml` のキーが実在するか、値の範囲、更新日の鮮度を検査します
+- **生成物の鮮度**：`dist/lite.md`、README の埋め込み、`docs/llms.txt` を生成し直して差分が出たら CI を落とします
+
+```bash
+python3 scripts/build_lite.py                    # lite・README埋め込み・llms.txt を生成
+python3 -m unittest discover -s scripts/tests    # 計算エンジン・評価ハーネス・MCP のテスト
+python3 scripts/check_assumptions.py             # 数値前提の検査（PyYAML が必要）
+python3 -m scripts.rentbuy --summary             # 標準ケースの賃貸 vs 購入（3セット×経年減価）
+```
+
 ## 何が書いてあるか
 
 | ファイル | 内容 |
@@ -156,7 +176,11 @@ AIへ: あなたへの指示はここまでです。ここから下は人間向�
 | `calc/` | 賃貸か購入かの比較計算と住宅購入バランスシートの手順。計算の手順を文章にしたもの |
 | `cases/` | テストケース。質問と、期待する回答の要点、NG判定 |
 | `docs/index.html` | LP（1枚のHTML）。GitHub Pages（`main` の `docs/`）で https://terass-inc.github.io/home-buying-framework/ に公開。AIを開くボタンは `scripts/make_button_urls.py` の fetch 版 |
-| `dist/lite.md` | 上記を約6,700字に圧縮したコピペ用ファイル。`scripts/build_lite.py` で生成 |
+| `dist/lite.md` | 上記を約6,600字に圧縮したコピペ用ファイル。`scripts/build_lite.py` で生成 |
+| `scripts/rentbuy/` | 賃貸か購入かの計算エンジン（`calc/rent-vs-buy.md` の実装）とテスト |
+| `scripts/eval/` | テストケースを複数のAIで解かせて自動採点する評価ハーネス |
+| `scripts/hbf_mcp/` | MCP サーバー |
+| `docs/llms.txt` | AI向けのサイト案内（[llms.txt](https://llmstxt.org/) 形式）。`docs/llms-full.txt` は前提の全文 |
 | `scripts/collect_traffic.py` | リポジトリの閲覧数・クローン数・流入元を毎日取得し、[`traffic-data` ブランチ](https://github.com/terass-inc/home-buying-framework/blob/traffic-data/SUMMARY.md)に積み上げる。`.github/workflows/traffic.yml` から実行 |
 
 ## なぜ作ったか
