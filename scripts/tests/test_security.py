@@ -132,6 +132,57 @@ class TestReviewFindings(unittest.TestCase):
         self.assertEqual(ip(scope(""), 2), "10.0.0.1")
 
 
+class TestMeasurementUrls(unittest.TestCase):
+    """MCP 以外の計測用 URL: AI に読ませる前提の配信と、クリック計測の転送。"""
+
+    @classmethod
+    def setUpClass(cls):
+        if not HAS_MCP:
+            raise unittest.SkipTest("mcp・httpx が無い")
+        sys.path.insert(0, str(ROOT / "scripts" / "hbf_mcp"))
+        import server  # noqa: PLC0415
+        from starlette.testclient import TestClient  # noqa: PLC0415
+        cls.client = TestClient(server.http_app(allowed_hosts=["testserver"]), follow_redirects=False)
+
+    def logs(self, fn):
+        import contextlib, io  # noqa: E401, PLC0415
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            r = fn()
+        return r, [json.loads(x) for x in buf.getvalue().splitlines() if x.startswith("{")]
+
+    def test_ai_text_is_served_uncached_and_counted_by_agent(self):
+        ua = "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; ChatGPT-User/1.0; +https://openai.com/bot"
+        r, logs = self.logs(lambda: self.client.get("/ai/home-buying?src=chatgpt-note", headers={"User-Agent": ua}))
+        self.assertEqual(r.status_code, 200)
+        self.assertIn("text/plain", r.headers["content-type"])
+        self.assertEqual(r.headers["cache-control"], "no-store")
+        self.assertIn("絶対に守る5つのルール", r.text)
+        fetch = [x for x in logs if x["event"] == "hbf_fetch"][0]
+        self.assertEqual((fetch["agent"], fetch["src"]), ("ChatGPT（利用者の操作）", "chatgpt-note"))
+        self.assertNotIn("ip", json.dumps(fetch).lower().replace("ipad", ""))
+
+    def test_click_redirects_only_to_fixed_destinations(self):
+        r, logs = self.logs(lambda: self.client.get("/go/home-buying/chatgpt?src=note"))
+        self.assertEqual(r.status_code, 302)
+        loc = r.headers["location"]
+        self.assertTrue(loc.startswith("https://chatgpt.com/?q="))
+        self.assertIn("terass.house%2Fai%2Fhome-buying%3Fsrc%3Dchatgpt-note", loc)  # 読ませる URL も計測用
+        click = [x for x in logs if x["event"] == "hbf_click"][0]
+        self.assertEqual((click["target"], click["src"]), ("chatgpt", "note"))
+        self.assertEqual(self.client.get("/go/home-buying/lp?src=x").headers["location"],
+                         "https://terass-inc.github.io/home-buying-framework/?utm_source=x")
+        # 決めていない行き先や、URL を渡しての転送はできない（オープンリダイレクトにしない）
+        self.assertEqual(self.client.get("/go/home-buying/https://evil.example").status_code, 404)
+        self.assertEqual(self.client.get("/go/home-buying/evil").status_code, 404)
+
+    def test_src_is_sanitized_and_methods_limited(self):
+        _, logs = self.logs(lambda: self.client.get("/ai/home-buying?src=<script>alert(1)</script>"))
+        self.assertEqual([x for x in logs if x["event"] == "hbf_fetch"][0]["src"], "other")
+        self.assertEqual(self.client.post("/ai/home-buying").status_code, 405)
+        self.assertEqual(self.client.head("/ai/home-buying").status_code, 200)
+
+
 class TestUsageReport(unittest.TestCase):
     def test_failed_calls_are_not_counted_as_consultations(self):
         import subprocess  # noqa: PLC0415
