@@ -84,6 +84,14 @@ class TestMcpServer(unittest.TestCase):
         r = self.call("diagnose", {"consultation_id": "c1.broken"})
         self.assertTrue(r.is_error)
 
+    def test_compression_bomb_id_is_rejected(self):
+        """公開サーバー対策: 展開すると巨大になる相談ID（圧縮爆弾）や長すぎるIDは、展開せずに断る。"""
+        import base64, zlib  # noqa: E401, PLC0415
+        small_bomb = "c1." + base64.urlsafe_b64encode(zlib.compress(b"0" * 2_000_000, 9)).decode().rstrip("=")
+        self.assertLess(len(small_bomb), 4_000)  # 長さの上限はすり抜けるが、展開後の上限で止まる
+        self.assertTrue(self.call("diagnose", {"consultation_id": small_bomb}).is_error)
+        self.assertTrue(self.call("diagnose", {"consultation_id": "c1." + "A" * 10_000}).is_error)
+
     def test_http_mode_is_stateless(self):
         """URL で公開する HTTP モード: セッションなしの JSON 応答で、相談IDだけで相談を続けられる。"""
         from starlette.testclient import TestClient  # noqa: PLC0415

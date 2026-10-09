@@ -112,7 +112,7 @@ server = MCPServer(
 
 class FactsInput(BaseModel):
     """相談で分かったこと。分かったものだけ渡せばよい（渡さない項目は変えない）。金額は円。"""
-    purpose: Optional[str] = Field(None, description="家を買おうと思ったきっかけ・理由（利用者の言葉のまま）")
+    purpose: Optional[str] = Field(None, max_length=500, description="家を買おうと思ったきっかけ・理由（利用者の言葉のまま、500字以内）")
     purpose_sentence_confirmed: Optional[bool] = Field(None, description="「〇〇のための家」と1文で確認できたか")
     stay_years: Optional[float] = Field(None, description="何年住む予定か（売却・住み替えまでの年数）")
     household_income_yen: Optional[int] = Field(None, description="世帯年収（円）")
@@ -130,6 +130,8 @@ class FactsInput(BaseModel):
 
 _FACT_FIELDS = {f.name for f in fields(consult.Facts)} - {"extra"}
 _TOKEN_PREFIX = "c1."
+_TOKEN_MAX_CHARS = 4_000    # 実際の相談IDは数百文字
+_TOKEN_MAX_BYTES = 16_384   # 展開後の上限
 
 
 def _encode(f: consult.Facts) -> str:
@@ -153,7 +155,15 @@ def _session(consultation_id: str) -> consult.Facts:
         if not consultation_id.startswith(_TOKEN_PREFIX):
             raise ValueError
         b = consultation_id[len(_TOKEN_PREFIX):]
-        d = json.loads(zlib.decompress(base64.urlsafe_b64decode(b + "=" * (-len(b) % 4))))
+        if len(b) > _TOKEN_MAX_CHARS:  # 公開サーバーなので、巨大な ID で負荷をかけられないようにする
+            raise ValueError
+        z = zlib.decompressobj()
+        raw = z.decompress(base64.urlsafe_b64decode(b + "=" * (-len(b) % 4)), _TOKEN_MAX_BYTES)
+        if z.unconsumed_tail or not z.eof:  # 展開後が上限を超える（圧縮爆弾）か、壊れている
+            raise ValueError
+        d = json.loads(raw)
+        if not isinstance(d, dict):
+            raise ValueError
         return consult.Facts(**{k: v for k, v in d.items() if k in _FACT_FIELDS})
     except Exception as exc:  # noqa: BLE001
         raise ToolError("consultation_id を読めません。直前に返された consultation_id をそのまま渡すか、"
