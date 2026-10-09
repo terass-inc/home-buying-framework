@@ -174,9 +174,16 @@ class TestJudgeInput(unittest.TestCase):
         self.assertEqual(ng_enum, ["C1", "C2", "N1", "N2"])
         j = fake_judgement(self.case)
         self.assertEqual(cp.validate_judgement(self.case, j), [])
-        j["ng_items"] = j["ng_items"][:-1] + [j["ng_items"][0]]
+        # 判定が一致する重複はまとめ、判定漏れだけを問題にする
+        j["ng_items"] = j["ng_items"][:-1] + [dict(j["ng_items"][0])]
         problems = cp.validate_judgement(self.case, j)
-        self.assertTrue(any("判定漏れ" in p for p in problems) and any("重複" in p for p in problems))
+        self.assertTrue(any("判定漏れ" in p for p in problems))
+        self.assertFalse(any("重複" in p for p in problems))
+        # 判定が食い違う重複は問題として返す
+        j = fake_judgement(self.case)
+        conflict = dict(j["ng_items"][0], triggered=not j["ng_items"][0]["triggered"])
+        j["ng_items"].append(conflict)
+        self.assertTrue(any("重複" in p for p in cp.validate_judgement(self.case, j)))
 
 
 def fake_judgement(case, triggered=(), statuses=None, rtype="clarifying_only", on_topic=True):

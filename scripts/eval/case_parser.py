@@ -306,9 +306,31 @@ def judge_schema(case: Case) -> dict:
     }
 
 
+def _dedupe_agreeing(items: list, verdict_key: str) -> list:
+    """同じ項目IDが複数回あっても判定が一致していれば1つにまとめる。食い違っていれば残して重複として扱う。"""
+    first, verdicts = {}, {}
+    for x in items:
+        i = x.get("id")
+        verdicts.setdefault(i, set()).add(x.get(verdict_key))
+        first.setdefault(i, x)
+    out = []
+    for x in items:
+        i = x.get("id")
+        if len(verdicts[i]) > 1:
+            out.append(x)
+        elif first.get(i) is x:
+            out.append(x)
+    return out
+
+
 def validate_judgement(case: Case, j: dict) -> list[str]:
-    """スキーマで縛れない整合性（全項目が1回ずつ判定されているか）を確認する。"""
+    """スキーマで縛れない整合性（全項目が1回ずつ判定されているか）を確認する。
+
+    判定が一致する重複はその場で1つにまとめる（j を書き換える）。食い違う重複と判定漏れは問題として返す。
+    """
     problems = []
+    j["ng_items"] = _dedupe_agreeing(j.get("ng_items", []), "triggered")
+    j["points"] = _dedupe_agreeing(j.get("points", []), "status")
     for key, expected in (("ng_items", [i for i, _ in case.all_ng()]),
                           ("points", [i for i, _ in case.all_points()])):
         got = [x.get("id") for x in j.get(key, [])]
