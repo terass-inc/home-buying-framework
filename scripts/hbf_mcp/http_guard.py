@@ -2,7 +2,7 @@
 
 - 接続元ごとの回数制限（1分あたり RATE_PER_MIN 回。超えたら 429）。インスタンスごとの近似値だが、
   台数の上限（Cloud Run の max-instances）と組み合わせて、全体の負荷と費用の上限を決める
-- 受け付けるメソッドとパスを限定する（/mcp の POST と、仕様上の GET・DELETE だけ）
+- 受け付けるメソッドとパスを限定する（MCP は POST と仕様上の GET・DELETE、計測用 URL は GET・HEAD だけ）
 - 応答にキャッシュ禁止とセキュリティ系のヘッダーを付ける（CDN や中継にも相談の中身を残させない）
 """
 from __future__ import annotations
@@ -11,6 +11,8 @@ import json
 import os
 import time
 from collections import defaultdict, deque
+
+import measure
 
 RATE_PER_MIN = int(os.environ.get("HBF_RATE_PER_MIN", "60"))
 # X-Forwarded-For の末尾から何番目を接続元とみなすか。末尾側は経由した基盤が付け足すので利用者には書き換えられない。
@@ -66,10 +68,14 @@ class HttpGuard:
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
             return await self.app(scope, receive, send)
-        if scope["path"].rstrip("/") != self.path:
+        path = scope["path"].rstrip("/")
+        is_mcp = path == self.path
+        is_measure = path == measure.TEXT_PATH or path.startswith(measure.GO_PREFIX + "/")
+        if not (is_mcp or is_measure):
             return await self._reject(send, 404, "not found")
-        if scope["method"] not in ("POST", "GET", "DELETE"):
-            return await self._reject(send, 405, "method not allowed", [(b"allow", b"POST, GET, DELETE")])
+        allowed = ("POST", "GET", "DELETE") if is_mcp else ("GET", "HEAD")
+        if scope["method"] not in allowed:
+            return await self._reject(send, 405, "method not allowed", [(b"allow", ", ".join(allowed).encode())])
         if DEBUG_FORWARDING:
             h = dict(scope.get("headers") or [])
             xff = [x for x in h.get(b"x-forwarded-for", b"").split(b",") if x.strip()]
@@ -78,6 +84,13 @@ class HttpGuard:
                               "x_forwarded_for_entries": len(xff)}), flush=True)  # IP の値そのものは出さない
         if self._limited(_client_ip(scope, self.hops)):
             return await self._reject(send, 429, "too many requests", [(b"retry-after", b"60")])
+
+        if is_measure:
+            ua = dict(scope.get("headers") or []).get(b"user-agent", b"").decode("latin-1")
+            status, headers, body = measure.handle(scope, ua)
+            await send({"type": "http.response.start", "status": status, "headers": [*headers, *_SECURITY_HEADERS]})
+            await send({"type": "http.response.body", "body": b"" if scope["method"] == "HEAD" else body})
+            return
 
         async def send_with_headers(message):
             if message["type"] == "http.response.start":

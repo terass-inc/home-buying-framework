@@ -81,6 +81,19 @@ self_check(topic=rent_vs_buy, shows_numbers=true)
 
 相談の状態（分かっている事実）は相談IDに詰めて AI とやりとりし、サーバーには保存しません。
 
+## 計測用 URL（MCP 以外）
+
+同じサーバーで、MCP を使わない利用も数えます。ログには IP アドレスや相談の中身を残しません。
+
+| URL | 用途 | 数えるもの |
+|---|---|---|
+| `https://terass.house/ai/home-buying?src=<媒体>` | AI に読ませる前提の本文（`dist/lite.md`）。「このURLを読んで相談に答えて」と AI に渡す | 読みに来た AI の種類（ChatGPT・Claude・Perplexity などを User-Agent で判別）。キャッシュさせないので取得のたびに数える |
+| `https://terass.house/go/home-buying/<行き先>?src=<媒体>` | LP のボタンや記事のリンク。クリックを数えてから転送する | 行き先と媒体ごとのクリック数 |
+
+行き先は `chatgpt`・`claude`（前提の URL を入れた状態で開く）、`lp`、`github`、`text`（前提の本文）だけです。任意の URL には転送しません。`src` は英小文字・数字・`-`・`_` の32字以内で、それ以外は `other` として数えます。
+
+例：note の記事に `https://terass.house/go/home-buying/chatgpt?src=note` を置くと、クリック数と、その後 ChatGPT が前提を読みに来た回数（`src=chatgpt-note`）の両方が取れます。集計は `usage_report.py` で出します。
+
 ## テスト
 
 ```bash
