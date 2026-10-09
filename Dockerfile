@@ -7,7 +7,7 @@ WORKDIR /app
 COPY scripts/hbf_mcp/requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
 COPY . .
-RUN pip install --no-deps . && rm -rf /app
+RUN pip install --no-deps --no-build-isolation . && rm -rf /app
 # root で動かさない
 RUN useradd --system --uid 10001 --no-create-home hbf
 USER 10001

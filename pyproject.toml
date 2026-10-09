@@ -2,7 +2,7 @@
 # リポジトリの文章（principles/・cases/・calc/・assumptions.yaml・dist/lite.md）を同梱し、
 # クローンしなくても同じ前提・同じ計算で動くようにする。
 [build-system]
-requires = ["hatchling>=1.25"]
+requires = ["hatchling==1.32.4"]
 build-backend = "hatchling.build"
 
 [project]

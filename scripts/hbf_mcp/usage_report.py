@@ -31,11 +31,12 @@ def main() -> None:
             p["date"] = (e.get("timestamp") or "")[:10]
             recs.append(p)
     calls = [r for r in recs if r.get("method") == "tools/call"]
-    starts = [r for r in calls if r.get("tool") == "start_consultation"]
+    done = [r for r in calls if r.get("ok")]  # 成功した呼び出しだけを「相談」として数える
+    starts = [r for r in done if r.get("tool") == "start_consultation"]
     print(f"# MCP サーバーの利用状況（{min((r['date'] for r in recs), default='-')} 〜 {max((r['date'] for r in recs), default='-')}）\n")
     print(f"- 道具の呼び出し: {len(calls):,}回（失敗 {sum(not r.get('ok') for r in calls):,}回）")
     print(f"- 相談の開始: {len(starts):,}件")
-    print(f"- 診断の更新: {sum(r.get('tool') == 'update_facts' for r in calls):,}回、もしも: {sum(r.get('tool') == 'what_if' for r in calls):,}回\n")
+    print(f"- 診断の更新: {sum(r.get('tool') == 'update_facts' for r in done):,}回、もしも: {sum(r.get('tool') == 'what_if' for r in done):,}回\n")
     for title, key in (("道具別", lambda r: r.get("tool")), ("AIアプリ別", app_of)):
         print(f"## {title}\n\n| 項目 | 回数 |\n|---|---|")
         for k, n in collections.Counter(map(key, calls)).most_common():

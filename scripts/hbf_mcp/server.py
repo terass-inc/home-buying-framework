@@ -138,6 +138,11 @@ class FactsInput(BaseModel):
 
 
 _FACT_FIELDS = {f.name for f in fields(consult.Facts)} - {"extra"}
+def _empty(v) -> bool:
+    """未入力かどうか。数値の 0（貯金0円・金利0%など）は入力済みとして扱う（0 == False で落とさない）。"""
+    return v is None or v is False or v == ""
+
+
 _TOKEN_PREFIX = "c1."
 _TOKEN_MAX_CHARS = 4_000    # 実際の相談IDは数百文字
 _TOKEN_MAX_BYTES = 16_384   # 展開後の上限
@@ -146,7 +151,7 @@ _TOKEN_MAX_BYTES = 16_384   # 展開後の上限
 def _encode(f: consult.Facts) -> str:
     """相談の状態を相談IDそのものに詰める。サーバーは何も保存しない（URLで公開しても、
     リクエストごとに別のサーバーが応答しても同じ相談を続けられ、利用者の情報がサーバーに残らない）。"""
-    d = {k: v for k, v in asdict(f).items() if k in _FACT_FIELDS and v not in (None, False, "")}
+    d = {k: v for k, v in asdict(f).items() if k in _FACT_FIELDS and not _empty(v)}
     raw = zlib.compress(json.dumps(d, ensure_ascii=False, separators=(",", ":")).encode("utf-8"), 9)
     return _TOKEN_PREFIX + base64.urlsafe_b64encode(raw).decode("ascii").rstrip("=")
 
@@ -173,7 +178,9 @@ def _session(consultation_id: str) -> consult.Facts:
         d = json.loads(raw)
         if not isinstance(d, dict):
             raise ValueError
-        return consult.Facts(**{k: v for k, v in d.items() if k in _FACT_FIELDS})
+        # 相談IDは利用者側から来る信頼できない入力。ふつうの入力と同じ範囲・型の検査を通す
+        checked = FactsInput.model_validate(d)
+        return _merge(consult.Facts(), checked)
     except Exception as exc:  # noqa: BLE001
         raise ToolError("consultation_id を読めません。直前に返された consultation_id をそのまま渡すか、"
                         "start_consultation で作り直してください") from exc
@@ -181,7 +188,7 @@ def _session(consultation_id: str) -> consult.Facts:
 
 def _report(cid: str, f: consult.Facts) -> dict:
     r = report.diagnose(f)
-    known = {k: v for k, v in asdict(f).items() if k != "extra" and v not in (None, False, "")}
+    known = {k: v for k, v in asdict(f).items() if k != "extra" and not _empty(v)}
     return {"consultation_id": cid, "consultation_id_note": "次の呼び出しでは、この consultation_id を使う（更新のたびに変わる）",
             "分かっていること": known, "report": r, "report_markdown": report.to_markdown(r)}
 
