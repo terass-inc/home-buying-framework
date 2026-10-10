@@ -86,6 +86,30 @@ FIELDS: list[tuple[str, str, str, int]] = [
 ]
 FIELD_INDEX = {k: (q, why, step) for k, q, why, step in FIELDS}
 
+# 押すだけで答えられる選択肢。末尾に OTHER を足して返す。金額の幅は計算で中央を仮置きする
+OTHER = "その他（自由に書く）"
+OPTIONS: dict[str, tuple[str, ...]] = {
+    "purpose": ("今の家が狭い・不便", "家賃がもったいない", "結婚・出産など家族の変化", "金利や価格が上がる前に"),
+    "purpose_sentence_confirmed": ("はい、合っています", "少し違う（言い直す）"),
+    "stay_years": ("5年未満", "5〜10年", "10〜20年", "20年以上・ずっと住む", "まだ分からない"),
+    "household_income_yen": ("600万円未満", "600〜900万円", "900〜1,200万円", "1,200〜1,800万円", "1,800万円以上"),
+    "savings_yen": ("300万円未満", "300〜1,000万円", "1,000〜2,000万円", "2,000万円以上"),
+    "current_rent_yen": ("10万円未満", "10〜15万円", "15〜20万円", "20万円以上", "実家・社宅などで家賃はない"),
+    "property_price_yen": ("4,000万円未満", "4,000〜6,000万円", "6,000〜8,000万円", "8,000万円以上", "まだ決めていない"),
+    "property_age_years": ("新築マンション", "中古マンション", "新築戸建て", "中古戸建て", "まだ決めていない"),
+    "comparable_rent_yen": ("自分で調べる（調べ方を教えてほしい）", "分からないので仮置きで進める"),
+    "rent_moves_known": ("今の家に住み続ける", "数年内に広い家へ住み替える", "まだ分からない"),
+    "rate_type": ("変動", "固定", "まだ決めていない（違いを知りたい）"),
+    "family_plan_known": ("今のところ予定はない", "家族が増える予定", "教育・介護の支出を見込んでいる", "まだ分からない"),
+    "existing_insurance_known": ("入っている", "入っていない", "分からない"),
+}
+
+
+def question(field: str) -> dict:
+    """1つの質問を、選択肢つきで返す。"""
+    q, why, _ = FIELD_INDEX[field]
+    return {"field": field, "question": q, "why": why, "options": [*OPTIONS.get(field, ()), OTHER]}
+
 
 @dataclass
 class Facts:
@@ -143,8 +167,7 @@ def next_step(topic: str, facts: Facts) -> dict:
     step = min((FIELD_INDEX[k][2] for k in missing), default=4)
     nq = None
     if missing:
-        q, why, _ = FIELD_INDEX[missing[0]]
-        nq = {"field": missing[0], "question": q, "why": why}
+        nq = question(missing[0])
     blocked = []
     if missing:
         blocked.append(f"{t.label}についての結論（{len(missing)}項目が未確認）")
@@ -161,6 +184,7 @@ def next_step(topic: str, facts: Facts) -> dict:
         "tools_when_ready": list(t.tools),
         "warnings": warnings,
         "rule": "1回の返答で聞く質問は next_question の1つだけ。missing を一度に並べて聞かない。"
+                "next_question.options を、選択肢を表示する機能があればそれで、なければ番号付きで示し、押すだけで答えられるようにする。"
                 "未確認のまま一般論を示すときは、前提を置いたことを明示する",
     }
 
