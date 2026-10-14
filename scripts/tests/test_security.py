@@ -186,6 +186,49 @@ class TestMeasurementUrls(unittest.TestCase):
         self.assertEqual(c.get("/go/home-buying/lp", headers={"Host": "x.run.app"}).status_code, 421)
         self.assertEqual(c.get("/ai/home-buying", headers={"Host": "terass.house"}).status_code, 200)
 
+    def test_firebase_forwarding_shape(self):
+        """2026-10-14 にステージングで確認した Firebase の転送の形（Host は *.run.app、元のドメインは X-Forwarded-Host、
+        X-Forwarded-For は「利用者, Firebase」の2件）を受け付け、それ以外は断る。"""
+        sys.path.insert(0, str(ROOT / "scripts" / "hbf_mcp"))
+        import server  # noqa: PLC0415
+        from http_guard import HttpGuard  # noqa: PLC0415
+        from starlette.testclient import TestClient  # noqa: PLC0415
+        app = server.http_app(allowed_hosts=["terass.house", "terass-house-staging.web.app"])
+        app.trust_forwarded_host, app.hops = True, 2
+        with TestClient(app, follow_redirects=False) as c:
+            self._check_firebase_shape(c)
+
+    def _check_firebase_shape(self, c):
+        fb = {"Host": "svc-abc-an.a.run.app", "X-Forwarded-Host": "terass-house-staging.web.app",
+              "X-Forwarded-For": "198.51.100.7, 203.0.113.9"}
+        h = {**fb, "Accept": "application/json, text/event-stream", "Content-Type": "application/json"}
+        r = c.post("/mcp", headers=h, json={"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
+            "protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "t", "version": "0"}}})
+        self.assertEqual(r.status_code, 200, r.text)
+        self.assertEqual(c.get("/ai/home-buying", headers=fb).status_code, 200)
+        self.assertEqual(c.get("/go/home-buying/lp", headers=fb).status_code, 302)
+        # 元のドメインが無い、または許可していないドメインなら断る
+        self.assertEqual(c.get("/ai/home-buying", headers={"Host": "svc-abc-an.a.run.app"}).status_code, 421)
+        self.assertEqual(c.get("/ai/home-buying", headers={**fb, "X-Forwarded-Host": "evil.example"}).status_code, 421)
+        # run.app 以外の Host で X-Forwarded-Host を名乗っても使わない
+        self.assertEqual(c.get("/ai/home-buying", headers={**fb, "Host": "other.example"}).status_code, 421)
+
+    def test_proxy_level_limit_cannot_be_spoofed(self):
+        """先頭の値を毎回変えて利用者ごとの上限をすり抜けても、偽装できない末尾の値ごとの上限で止まる。"""
+        now = [0.0]
+
+        async def ok_app(scope, receive, send):
+            await send({"type": "http.response.start", "status": 200, "headers": []})
+            await send({"type": "http.response.body", "body": b"{}"})
+
+        sys.path.insert(0, str(ROOT / "scripts" / "hbf_mcp"))
+        from http_guard import HttpGuard  # noqa: PLC0415
+        from starlette.testclient import TestClient  # noqa: PLC0415
+        g = HttpGuard(ok_app, "/mcp", rate_per_min=3, clock=lambda: now[0], trusted_proxy_hops=2, proxy_rate_per_min=5)
+        c = TestClient(g)
+        codes = [c.post("/mcp", headers={"X-Forwarded-For": f"10.0.0.{i}, 192.0.2.1"}).status_code for i in range(7)]
+        self.assertEqual(codes, [200] * 5 + [429] * 2)
+
     def test_src_is_sanitized_and_methods_limited(self):
         _, logs = self.logs(lambda: self.client.get("/ai/home-buying?src=<script>alert(1)</script>"))
         self.assertEqual([x for x in logs if x["event"] == "hbf_fetch"][0]["src"], "other")
