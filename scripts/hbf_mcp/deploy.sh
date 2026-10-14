@@ -17,7 +17,26 @@ cd "$(dirname "$0")/../.."
 # 実行用のサービスアカウントは権限を何も持たない（既定のサービスアカウントはプロジェクトの編集権限を持つため使わない）。
 # サーバーは外部のサービスを呼ばず、ログは標準出力に書くだけなので、権限は不要。
 
-gcloud run deploy "$SERVICE" --project "$PROJECT" --region "$REGION" --source . \
+# 1) ビルド。`gcloud run deploy --source` は既定バケットの持ち主を確かめられないと別名のバケットを作ろうとして
+#    権限エラーになる（2026-10-14）。そのため、情シスが用意したバケットを明示してビルドし、イメージを指定してデプロイする。
+#    ログは Cloud Logging だけに出す（ログ用バケットの作成を避ける）。
+BUCKET="${BUCKET:-run-sources-${PROJECT}-${REGION}}"
+IMAGE="${REGION}-docker.pkg.dev/${PROJECT}/cloud-run-source-deploy/${SERVICE}:$(git rev-parse --short HEAD)$(git diff --quiet || echo -dirty)"
+CB=$(mktemp -t cloudbuild.XXXX.yaml)
+cat > "$CB" <<YAML
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args: ["build", "-t", "${IMAGE}", "."]
+images: ["${IMAGE}"]
+options:
+  logging: CLOUD_LOGGING_ONLY
+YAML
+gcloud builds submit . --project "$PROJECT" --region "$REGION" --config "$CB" \
+  --gcs-source-staging-dir "gs://${BUCKET}/source"
+rm -f "$CB"
+
+# 2) デプロイ
+gcloud run deploy "$SERVICE" --project "$PROJECT" --region "$REGION" --image "$IMAGE" \
   --service-account "$SA" --allow-unauthenticated --ingress all \
   --memory 512Mi --cpu 1 --min-instances 0 --max-instances 2 --concurrency 40 --timeout 30 \
   --set-env-vars "^@^HBF_MCP_PATH=/mcp/home-buying@HBF_RATE_PER_MIN=60@HBF_TRUSTED_PROXY_HOPS=2@HBF_DEBUG_FORWARDING=${DEBUG_FORWARDING}@HBF_ALLOWED_HOSTS=${HOSTS}"
