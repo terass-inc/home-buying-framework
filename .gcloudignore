@@ -1,8 +1,0 @@
-# gcloud builds submit でアップロードしないもの
-.git
-.gitignore
-#!include:.gitignore
-cases/results/
-**/__pycache__/
-build/
-*.egg-info/

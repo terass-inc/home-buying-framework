@@ -17,23 +17,45 @@ cd "$(dirname "$0")/../.."
 # 実行用のサービスアカウントは権限を何も持たない（既定のサービスアカウントはプロジェクトの編集権限を持つため使わない）。
 # サーバーは外部のサービスを呼ばず、ログは標準出力に書くだけなので、権限は不要。
 
-# 1) ビルド。`gcloud run deploy --source` は既定バケットの持ち主を確かめられないと別名のバケットを作ろうとして
-#    権限エラーになる（2026-10-14）。そのため、情シスが用意したバケットを明示してビルドし、イメージを指定してデプロイする。
-#    ログは Cloud Logging だけに出す（ログ用バケットの作成を避ける）。
+# 1) ビルド（2026-10-14 の初回デプロイで踏んだ権限の罠を避ける形）
+#    - `gcloud run deploy --source` は既定バケットの持ち主を確かめられないと別名のバケットを作ろうとして失敗する
+#    - `gcloud builds submit` は serviceusage.services.use を要求する
+#    そのため、コミット済みのソースを固めて情シスが用意したバケットに置き、Cloud Build の API に
+#    ビルド専用アカウント（権限は最小）を指定して直接依頼する。ログは Cloud Logging だけに出す。
 BUCKET="${BUCKET:-run-sources-${PROJECT}-${REGION}}"
-IMAGE="${REGION}-docker.pkg.dev/${PROJECT}/cloud-run-source-deploy/${SERVICE}:$(git rev-parse --short HEAD)$(git diff --quiet || echo -dirty)"
-CB=$(mktemp -t cloudbuild.XXXX.yaml)
-cat > "$CB" <<YAML
-steps:
-  - name: gcr.io/cloud-builders/docker
-    args: ["build", "-t", "${IMAGE}", "."]
-images: ["${IMAGE}"]
-options:
-  logging: CLOUD_LOGGING_ONLY
-YAML
-gcloud builds submit . --project "$PROJECT" --region "$REGION" --config "$CB" \
-  --gcs-source-staging-dir "gs://${BUCKET}/source"
-rm -f "$CB"
+BUILD_SA="${BUILD_SA:-home-buying-mcp-build@${PROJECT}.iam.gserviceaccount.com}"
+git diff --quiet && git diff --cached --quiet || { echo "未コミットの変更があります。コミットしてから実行してください"; exit 1; }
+SHA=$(git rev-parse --short HEAD)
+IMAGE="${REGION}-docker.pkg.dev/${PROJECT}/cloud-run-source-deploy/${SERVICE}:${SHA}"
+TGZ=$(mktemp -t hbf-src.XXXX).tgz
+git archive --format=tar.gz -o "$TGZ" HEAD
+gcloud storage cp "$TGZ" "gs://${BUCKET}/source/${SHA}.tgz" --quiet
+rm -f "$TGZ"
+TOKEN=$(gcloud auth print-access-token)
+BUILD_ID=$(python3 - "$TOKEN" "$PROJECT" "$REGION" "$BUCKET" "$SHA" "$IMAGE" "$BUILD_SA" <<'PY'
+import json, sys, urllib.request, urllib.error
+token, project, region, bucket, sha, image, sa = sys.argv[1:]
+body = {"source": {"storageSource": {"bucket": bucket, "object": f"source/{sha}.tgz"}},
+        "steps": [{"name": "gcr.io/cloud-builders/docker", "args": ["build", "-t", image, "."]}],
+        "images": [image], "serviceAccount": f"projects/{project}/serviceAccounts/{sa}",
+        "options": {"logging": "CLOUD_LOGGING_ONLY"}}
+req = urllib.request.Request(f"https://cloudbuild.googleapis.com/v1/projects/{project}/locations/{region}/builds",
+                             data=json.dumps(body).encode(), method="POST",
+                             headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
+try:
+    print(json.load(urllib.request.urlopen(req))["metadata"]["build"]["id"])
+except urllib.error.HTTPError as e:
+    sys.exit(f"ビルドの依頼に失敗: {e.code} {e.read().decode()[:600]}")
+PY
+)
+echo "ビルド中: ${BUILD_ID}"
+while :; do
+  STATUS=$(gcloud builds describe "$BUILD_ID" --project "$PROJECT" --region "$REGION" --format 'value(status)')
+  case "$STATUS" in SUCCESS) break ;; FAILURE|INTERNAL_ERROR|TIMEOUT|CANCELLED|EXPIRED)
+    echo "ビルド失敗: ${STATUS}（ログ: gcloud logging read 'resource.type=\"build\" AND resource.labels.build_id=\"${BUILD_ID}\"' --project ${PROJECT}）"; exit 1 ;; esac
+  sleep 10
+done
+echo "ビルド完了: ${IMAGE}"
 
 # 2) デプロイ
 gcloud run deploy "$SERVICE" --project "$PROJECT" --region "$REGION" --image "$IMAGE" \
