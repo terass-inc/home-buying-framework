@@ -437,7 +437,7 @@ def http_app(allowed_hosts: Optional[list[str]] = None):
     from http_guard import HttpGuard
     app = server.streamable_http_app(streamable_http_path=path, stateless_http=True, json_response=True,
                                      transport_security=sec, max_request_body_size=64 * 1024)
-    return HttpGuard(app, path)
+    return HttpGuard(app, path, allowed_hosts=hosts)
 
 
 def main() -> None:

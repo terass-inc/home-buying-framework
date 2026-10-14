@@ -11,6 +11,7 @@ import json
 import os
 import time
 from collections import defaultdict, deque
+from typing import Optional
 
 import measure
 
@@ -42,10 +43,22 @@ def _client_ip(scope, hops: int = TRUSTED_PROXY_HOPS) -> str:
 
 class HttpGuard:
     def __init__(self, app, path: str, rate_per_min: int = RATE_PER_MIN, clock=time.monotonic,
-                 trusted_proxy_hops: int = TRUSTED_PROXY_HOPS):
+                 trusted_proxy_hops: int = TRUSTED_PROXY_HOPS, allowed_hosts: Optional[list[str]] = None):
         self.app, self.path, self.rate, self.clock = app, path.rstrip("/") or "/", rate_per_min, clock
         self.hops = trusted_proxy_hops
+        self.allowed_hosts = allowed_hosts  # None なら検査しない（MCP 側は SDK も検査する）
         self.hits: dict[str, deque] = defaultdict(deque)
+
+    def _host_ok(self, scope) -> bool:
+        """計測用 URL も MCP と同じく、許可したホスト（terass.house 系）経由だけを受け付ける。
+        *.run.app に直接来たアクセスを断ることで、回数制限の接続元の決め方と計測の数字を Firebase 経由に揃える。"""
+        if not self.allowed_hosts:
+            return True
+        host = dict(scope.get("headers") or []).get(b"host", b"").decode("latin-1")
+        for pat in self.allowed_hosts:
+            if host == pat or (pat.endswith(":*") and host.split(":")[0] == pat[:-2]):
+                return True
+        return False
 
     async def _reject(self, send, status: int, message: str, extra=()):
         body = json.dumps({"error": message}, ensure_ascii=False).encode("utf-8")
@@ -73,6 +86,8 @@ class HttpGuard:
         is_measure = path == measure.TEXT_PATH or path.startswith(measure.GO_PREFIX + "/")
         if not (is_mcp or is_measure):
             return await self._reject(send, 404, "not found")
+        if is_measure and not self._host_ok(scope):
+            return await self._reject(send, 421, "misdirected request")
         allowed = ("POST", "GET", "DELETE") if is_mcp else ("GET", "HEAD")
         if scope["method"] not in allowed:
             return await self._reject(send, 405, "method not allowed", [(b"allow", ", ".join(allowed).encode())])

@@ -176,6 +176,16 @@ class TestMeasurementUrls(unittest.TestCase):
         self.assertEqual(self.client.get("/go/home-buying/https://evil.example").status_code, 404)
         self.assertEqual(self.client.get("/go/home-buying/evil").status_code, 404)
 
+    def test_direct_access_to_other_hosts_is_refused(self):
+        """計測用 URL も、許可していないホスト（*.run.app への直接アクセスなど）からは 421 で断る。"""
+        sys.path.insert(0, str(ROOT / "scripts" / "hbf_mcp"))
+        import server  # noqa: PLC0415
+        from starlette.testclient import TestClient  # noqa: PLC0415
+        c = TestClient(server.http_app(allowed_hosts=["terass.house"]), follow_redirects=False)
+        self.assertEqual(c.get("/ai/home-buying").status_code, 421)                 # Host: testserver
+        self.assertEqual(c.get("/go/home-buying/lp", headers={"Host": "x.run.app"}).status_code, 421)
+        self.assertEqual(c.get("/ai/home-buying", headers={"Host": "terass.house"}).status_code, 200)
+
     def test_src_is_sanitized_and_methods_limited(self):
         _, logs = self.logs(lambda: self.client.get("/ai/home-buying?src=<script>alert(1)</script>"))
         self.assertEqual([x for x in logs if x["event"] == "hbf_fetch"][0]["src"], "other")
