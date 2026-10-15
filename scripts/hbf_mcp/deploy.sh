@@ -61,13 +61,14 @@ echo "ビルド完了: ${IMAGE}"
 gcloud run deploy "$SERVICE" --project "$PROJECT" --region "$REGION" --image "$IMAGE" \
   --service-account "$SA" --allow-unauthenticated --ingress all \
   --memory 512Mi --cpu 1 --min-instances 0 --max-instances 2 --concurrency 40 --timeout 30 \
-  --set-env-vars "^@^HBF_MCP_PATH=/mcp/home-buying@HBF_RATE_PER_MIN=60@HBF_TRUSTED_PROXY_HOPS=2@HBF_DEBUG_FORWARDING=${DEBUG_FORWARDING}@HBF_ALLOWED_HOSTS=${HOSTS}"
+  --set-env-vars "^@^HBF_MCP_PATH=/mcp/home-buying@HBF_RATE_PER_MIN=60@HBF_TRUSTED_PROXY_HOPS=2@HBF_TRUST_FORWARDED_HOST=1@HBF_PROXY_RATE_PER_MIN=600@HBF_DEBUG_FORWARDING=${DEBUG_FORWARDING}@HBF_ALLOWED_HOSTS=${HOSTS}"
 
 # 許可するのは terass.house 系のホストだけにし、Cloud Run の *.run.app への直接アクセスは受け付けない（421）。
 # すべての利用が Firebase Hosting 経由になるので、回数制限の接続元（X-Forwarded-For の末尾から2番目）を一意に決められる。
 # 初回はステージングで、HBF_DEBUG_FORWARDING=1 を付けて Firebase 経由の Host と X-Forwarded-For の件数を確かめる:
 #   gcloud run services update "$SERVICE" --update-env-vars HBF_DEBUG_FORWARDING=1 ...
 #   gcloud logging read 'jsonPayload.event="hbf_forwarding_debug"' --project "$PROJECT" --limit 5
-# Host が terass.house 系で、X-Forwarded-For が2件（利用者, Firebase）なら、この設定のまま本番に出す。
+# 2026-10-14 の確認結果: Host は *.run.app、X-Forwarded-Host に元のドメイン、X-Forwarded-For は2件（利用者, Firebase）。
+# そのため HBF_TRUST_FORWARDED_HOST=1 で X-Forwarded-Host を元のドメインとして扱い、末尾から2番目を利用者とする。
 # 違っていたら HBF_ALLOWED_HOSTS と HBF_TRUSTED_PROXY_HOPS を実際の形に合わせ、確認後に HBF_DEBUG_FORWARDING を外す。
 echo "デプロイ完了: https://terass.house/mcp/home-buying（Firebase Hosting の転送経由）"

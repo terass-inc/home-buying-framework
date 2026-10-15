@@ -20,6 +20,12 @@ RATE_PER_MIN = int(os.environ.get("HBF_RATE_PER_MIN", "60"))
 # 先頭側は利用者が自由に書けるので使わない。Cloud Run に直接: 1（Google のフロントエンドが付けた値）、
 # Firebase Hosting 経由: 2（Firebase が付けた利用者の値。その後ろに Google のフロントエンドが Firebase の値を付ける）
 TRUSTED_PROXY_HOPS = int(os.environ.get("HBF_TRUSTED_PROXY_HOPS", "1"))
+# 経由した基盤（Firebase Hosting など）ごとの上限。末尾の値は Google のフロントエンドが付けるので偽装できない。
+# 利用者ごとの上限（先頭側の値）は偽装されうるので、こちらで直接アクセスの総量を抑える。
+PROXY_RATE_PER_MIN = int(os.environ.get("HBF_PROXY_RATE_PER_MIN", "600"))
+# Firebase Hosting の転送では Host が *.run.app になり、元のドメインは X-Forwarded-Host に入る（2026-10-14 に確認）。
+# 1 にすると、Host が *.run.app で X-Forwarded-Host が許可したドメインのときに、元のドメインとして扱う。
+TRUST_FORWARDED_HOST = os.environ.get("HBF_TRUST_FORWARDED_HOST") == "1"
 # 初回デプロイの確認用。転送の形（Host・X-Forwarded-Host・X-Forwarded-For の件数）だけをログに出す
 DEBUG_FORWARDING = os.environ.get("HBF_DEBUG_FORWARDING") == "1"
 _SECURITY_HEADERS = [
@@ -43,18 +49,20 @@ def _client_ip(scope, hops: int = TRUSTED_PROXY_HOPS) -> str:
 
 class HttpGuard:
     def __init__(self, app, path: str, rate_per_min: int = RATE_PER_MIN, clock=time.monotonic,
-                 trusted_proxy_hops: int = TRUSTED_PROXY_HOPS, allowed_hosts: Optional[list[str]] = None):
+                 trusted_proxy_hops: int = TRUSTED_PROXY_HOPS, allowed_hosts: Optional[list[str]] = None,
+                 trust_forwarded_host: bool = TRUST_FORWARDED_HOST, proxy_rate_per_min: int = PROXY_RATE_PER_MIN):
         self.app, self.path, self.rate, self.clock = app, path.rstrip("/") or "/", rate_per_min, clock
         self.hops = trusted_proxy_hops
         self.allowed_hosts = allowed_hosts  # None なら検査しない（MCP 側は SDK も検査する）
         self.hits: dict[str, deque] = defaultdict(deque)
+        self.trust_forwarded_host, self.proxy_rate = trust_forwarded_host, proxy_rate_per_min
 
     def _host_ok(self, scope) -> bool:
         """計測用 URL も MCP と同じく、許可したホスト（terass.house 系）経由だけを受け付ける。
         *.run.app に直接来たアクセスを断ることで、回数制限の接続元の決め方と計測の数字を Firebase 経由に揃える。"""
         if not self.allowed_hosts:
             return True
-        host = dict(scope.get("headers") or []).get(b"host", b"").decode("latin-1")
+        host = self._effective_host(scope)
         for pat in self.allowed_hosts:
             if host == pat or (pat.endswith(":*") and host.split(":")[0] == pat[:-2]):
                 return True
@@ -66,11 +74,19 @@ class HttpGuard:
                     "headers": [(b"content-type", b"application/json; charset=utf-8"), *extra, *_SECURITY_HEADERS]})
         await send({"type": "http.response.body", "body": body})
 
-    def _limited(self, ip: str) -> bool:
+    def _effective_host(self, scope) -> str:
+        h = dict(scope.get("headers") or [])
+        host = h.get(b"host", b"").decode("latin-1")
+        fwd = h.get(b"x-forwarded-host", b"").decode("latin-1").split(",")[0].strip()
+        if self.trust_forwarded_host and fwd and host.split(":")[0].endswith(".run.app"):
+            return fwd
+        return host
+
+    def _limited(self, ip: str, limit: Optional[int] = None) -> bool:
         now, q = self.clock(), self.hits[ip]
         while q and now - q[0] > 60:
             q.popleft()
-        if len(q) >= self.rate:
+        if len(q) >= (limit or self.rate):
             return True
         q.append(now)
         if len(self.hits) > 50_000:  # 記録が増えすぎたら古い接続元から捨てる
@@ -97,8 +113,12 @@ class HttpGuard:
             print(json.dumps({"event": "hbf_forwarding_debug", "host": h.get(b"host", b"").decode("latin-1"),
                               "x_forwarded_host": h.get(b"x-forwarded-host", b"").decode("latin-1") or None,
                               "x_forwarded_for_entries": len(xff)}), flush=True)  # IP の値そのものは出さない
-        if self._limited(_client_ip(scope, self.hops)):
+        last_hop = "hop:" + _client_ip(scope, 1)  # 末尾は偽装できない（直接アクセスなら本人、転送なら基盤）
+        if self._limited(_client_ip(scope, self.hops)) or (self.hops > 1 and self._limited(last_hop, self.proxy_rate)):
             return await self._reject(send, 429, "too many requests", [(b"retry-after", b"60")])
+        if self.trust_forwarded_host:  # 以降（MCP の SDK のホスト検査を含む）は元のドメインとして扱う
+            eff = self._effective_host(scope).encode("latin-1")
+            scope = {**scope, "headers": [(k, eff if k == b"host" else v) for k, v in scope.get("headers") or []]}
 
         if is_measure:
             ua = dict(scope.get("headers") or []).get(b"user-agent", b"").decode("latin-1")
