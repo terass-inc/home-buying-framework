@@ -194,7 +194,6 @@ python3 -m scripts.rentbuy --summary             # 標準ケースの賃貸 vs �
 | `scripts/eval/` | テストケースを複数のAIで解かせて自動採点する評価ハーネス |
 | `scripts/hbf_mcp/` | MCP サーバー |
 | `docs/llms.txt` | AI向けのサイト案内（[llms.txt](https://llmstxt.org/) 形式）。`docs/llms-full.txt` は前提の全文 |
-| `scripts/collect_traffic.py` | リポジトリの閲覧数・クローン数・流入元を毎日取得し、[`traffic-data` ブランチ](https://github.com/terass-inc/home-buying-framework/blob/traffic-data/SUMMARY.md)に積み上げる。`.github/workflows/traffic.yml` から実行 |
 
 ## なぜ作ったか
 
