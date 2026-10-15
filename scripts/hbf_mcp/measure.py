@@ -15,6 +15,7 @@ import json
 import os
 import re
 import urllib.parse
+from pathlib import Path
 from typing import Optional
 
 from paths import ROOT
@@ -63,7 +64,7 @@ def _prompt(src: str) -> str:
     return f"""まず次のURLの前提を読み、その前提で住宅購入の相談に答えてください。
 {text_url(src)}
 
-URLを実際に読めた場合だけ「完全版を読み込みました」と言い、読めなかった場合は読めたふりをせず「要点版で進めます」と言ってから、最低限次の5つを守ってください。
+URLを実際に読めた場合だけ「前提を読み込みました」と言い、読めなかった場合は読めたふりをせず「要点版で進めます」と言ってから、最低限次の5つを守ってください。
 1. 結論より先に「なぜ買うのか」を掘り（「家賃がもったいない」は理由ではない）、次に「何年住む予定か（売却時期）」を確認する
 2. ローン期間は利息総額でなく、売却時の残債と手残りで考える。原則は組める最長で組み、短縮は繰上返済で行う
 3. 「借りられる額」（年収7〜8倍）と「借りるべき額」（ライフプランから逆算）を混同しない
@@ -100,13 +101,45 @@ def lite_bytes() -> bytes:
     return _lite_cache
 
 
+PRINCIPLES_PREFIX = TEXT_PATH + "/principles/"
+
+
+def _principles() -> dict[str, Path]:
+    return {p.name[:2]: p for p in sorted((ROOT / "principles").glob("[0-9][0-9]-*.md"))}
+
+
+def _principle_index(src: Optional[str]) -> bytes:
+    """前提の本文の末尾に付ける、話題別の原則への道案内（GitHub の README からたどれたのと同じ役割）。"""
+    q = f"?src={src}" if src else ""
+    lines = ["", "## 話題別の詳細（その話題が出たら、該当するURLを読んでから答える）", ""]
+    for pid, path in _principles().items():
+        title = re.search(r"^# (.+)$", path.read_text(encoding="utf-8"), re.M).group(1)
+        title = re.sub(r"（AIが回答するときの原則）$", "", title).strip()
+        lines.append(f"- {title}: {PUBLIC_BASE}{PRINCIPLES_PREFIX}{pid}{q}")
+    return ("\n".join(lines) + "\n").encode("utf-8")
+
+
+def is_text_path(path: str) -> bool:
+    path = path.rstrip("/")
+    return path == TEXT_PATH or path.startswith(PRINCIPLES_PREFIX)
+
+
 def handle(scope, user_agent: str):
     """計測用 URL なら (status, headers, body) を返す。対象外なら None。"""
     path = scope["path"].rstrip("/")
     src = clean_src(scope.get("query_string", b""))
+    text = [(b"content-type", b"text/plain; charset=utf-8")]
     if path == TEXT_PATH:
-        _log("hbf_fetch", agent=classify(user_agent), src=src, user_agent=(user_agent or "")[:200])
-        return 200, [(b"content-type", b"text/plain; charset=utf-8")], lite_bytes()
+        _log("hbf_fetch", doc="lite", agent=classify(user_agent), src=src, user_agent=(user_agent or "")[:200])
+        return 200, text, lite_bytes() + _principle_index(src)
+    if path.startswith(PRINCIPLES_PREFIX):
+        pid = path[len(PRINCIPLES_PREFIX):]
+        files = _principles()
+        if pid not in files:  # 決めた ID 以外は読ませない（パスをたどらせない）
+            return 404, [(b"content-type", b"application/json")], b'{"error": "not found"}'
+        _log("hbf_fetch", doc=f"principles/{pid}", agent=classify(user_agent), src=src,
+             user_agent=(user_agent or "")[:200])
+        return 200, text, files[pid].read_bytes()
     if path.startswith(GO_PREFIX + "/"):
         target = path[len(GO_PREFIX) + 1:]
         dest = destination(target, src or "direct")

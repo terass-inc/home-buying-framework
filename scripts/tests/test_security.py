@@ -162,6 +162,24 @@ class TestMeasurementUrls(unittest.TestCase):
         self.assertEqual((fetch["agent"], fetch["src"]), ("ChatGPT（利用者の操作）", "chatgpt-note"))
         self.assertNotIn("ip", json.dumps(fetch).lower().replace("ipad", ""))
 
+    def test_lite_links_to_each_principle_and_they_are_served(self):
+        """前提の本文の末尾に話題別の原則12本の URL が付き、各 URL で原則の本文が読める（GitHub の README と同じくたどれる）。"""
+        r = self.client.get("/ai/home-buying?src=readme")
+        self.assertIn("## 話題別の詳細", r.text)
+        urls = [l.split(": ", 1)[1] for l in r.text.splitlines() if "/ai/home-buying/principles/" in l]
+        self.assertEqual(len(urls), 12)
+        self.assertTrue(all(u.startswith("https://terass.house/ai/home-buying/principles/") and u.endswith("?src=readme")
+                            for u in urls))
+        r, logs = self.logs(lambda: self.client.get("/ai/home-buying/principles/02?src=readme",
+                                                    headers={"User-Agent": "Claude-User/1.0"}))
+        self.assertEqual(r.status_code, 200)
+        self.assertIn("ローン期間", r.text)
+        fetch = [x for x in logs if x["event"] == "hbf_fetch"][0]
+        self.assertEqual((fetch["doc"], fetch["agent"]), ("principles/02", "Claude（利用者の操作）"))
+        # 決めた ID 以外は読ませない（ほかのファイルへたどらせない）
+        for bad in ("zz", "AGENTS", "..%2F..%2FAGENTS.md", "02-loan-term"):
+            self.assertEqual(self.client.get(f"/ai/home-buying/principles/{bad}").status_code, 404, bad)
+
     def test_click_redirects_only_to_fixed_destinations(self):
         r, logs = self.logs(lambda: self.client.get("/go/home-buying/chatgpt?src=note"))
         self.assertEqual(r.status_code, 302)
