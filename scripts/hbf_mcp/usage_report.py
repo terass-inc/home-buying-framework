@@ -52,6 +52,8 @@ def main() -> None:
     print(f"\n# 計測用 URL\n\n- 前提の本文の取得: {len(fetches):,}回（うちAIが利用者の操作で読みに来た: {len(ai_reads):,}回）")
     print(f"- ボタン・リンクのクリック: {len(clicks):,}回\n")
     for title, rows, key in (("取得元（前提の本文）", fetches, lambda r: r.get("agent")),
+                             ("読まれた文書（lite＝前提の本文、principles/NN＝話題別の原則）", fetches,
+                              lambda r: r.get("doc") or "lite"),
                              ("クリックの行き先", clicks, lambda r: r.get("target")),
                              ("クリックの媒体（src）", clicks, lambda r: r.get("src") or "（なし）")):
         print(f"## {title}\n\n| 項目 | 回数 |\n|---|---|")

@@ -19,12 +19,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 REPO = "https://github.com/terass-inc/home-buying-framework"
+# AIに読ませる前提の配信（terass.house の計測用 URL。AIが読みに来た回数を数える）。
+# LP のボタンは、この文を入れた URL を直接持たず https://terass.house/go/home-buying/<chatgpt|claude>?src=... を使う
+TEXT_URL = "https://terass.house/ai/home-buying"
 SERVICES = [("ChatGPT", "https://chatgpt.com/?q="), ("Claude", "https://claude.ai/new?q=")]
 
-FETCH_PROMPT = f"""まず次のページの「AIへの前提」以下を読み、その前提で住宅購入の相談に答えてください。
-{REPO}
+FETCH_PROMPT = f"""まず次のURLの前提を読み、その前提で住宅購入の相談に答えてください。
+{TEXT_URL}?src=button
 
-URLを実際に読めた場合だけ「完全版を読み込みました」と言い、読めなかった場合は読めたふりをせず「要点版で進めます」と言ってから、最低限次の5つを守ってください。
+URLを実際に読めた場合だけ「前提を読み込みました」と言い、読めなかった場合は読めたふりをせず「要点版で進めます」と言ってから、最低限次の5つを守ってください。
 1. 結論より先に「なぜ買うのか」を掘り（「家賃がもったいない」は理由ではない）、次に「何年住む予定か（売却時期）」を確認する
 2. ローン期間は利息総額でなく、売却時の残債と手残りで考える。原則は組める最長で組み、短縮は繰上返済で行う
 3. 「借りられる額」（年収7〜8倍）と「借りるべき額」（ライフプランから逆算）を混同しない

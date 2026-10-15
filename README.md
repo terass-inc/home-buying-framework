@@ -15,11 +15,11 @@ ChatGPT や Claude に住宅購入の相談をする前に、これを読み込�
 ChatGPT や Claude の入力欄に、次の2行を貼って送信してください。
 
 ```
-https://github.com/terass-inc/home-buying-framework
-このページの「AIへの前提」以下を読み、その前提で住宅購入の相談に答えてください。
+https://terass.house/ai/home-buying?src=readme
+このURLの前提を読み、その前提で住宅購入の相談に答えてください。
 ```
 
-AIが「家を買おうと思ったきっかけを教えてください」と選択肢付きで聞いてきたら、そこから相談を始めてください。以降の質問も、番号（またはボタン）を選ぶだけで答えられます。選択肢に合うものがなければ、自由に書いてください。AIはこのページの前提を会話全体に適用します。
+AIが「家を買おうと思ったきっかけを教えてください」と選択肢付きで聞いてきたら、そこから相談を始めてください。以降の質問も、番号（またはボタン）を選ぶだけで答えられます。選択肢に合うものがなければ、自由に書いてください。AIはこの前提を会話全体に適用します。
 
 AIが「URLを開けません」と答えた場合（無料版 ChatGPT など）は、[こちらの文章](https://raw.githubusercontent.com/terass-inc/home-buying-framework/main/dist/lite.md)を全文コピーして貼り付けてください（約6,800字。内容は下の「AIへの前提」と同じです）。開けないときは[予備のURL](https://terass-inc.github.io/home-buying-framework/llms-full.txt)から取得できます。
 

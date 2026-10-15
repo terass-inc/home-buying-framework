@@ -99,7 +99,7 @@ class HttpGuard:
             return await self.app(scope, receive, send)
         path = scope["path"].rstrip("/")
         is_mcp = path == self.path
-        is_measure = path == measure.TEXT_PATH or path.startswith(measure.GO_PREFIX + "/")
+        is_measure = measure.is_text_path(path) or path.startswith(measure.GO_PREFIX + "/")
         if not (is_mcp or is_measure):
             return await self._reject(send, 404, "not found")
         if is_measure and not self._host_ok(scope):
