@@ -15,7 +15,16 @@ cd "$(dirname "$0")/../.."
 # API の有効化は情シスが実施済み
 
 # 実行用のサービスアカウントは権限を何も持たない（既定のサービスアカウントはプロジェクトの編集権限を持つため使わない）。
-# サーバーは外部のサービスを呼ばず、ログは標準出力に書くだけなので、権限は不要。
+# サーバーが呼ぶ外部サービスは GA4 の受け口（google-analytics.com、API シークレットで送る）だけで、ログは標準出力に書くので、権限は不要。
+
+# GA4 への送信（ga4.py）。手元の環境変数 GA4_MEASUREMENT_ID と GA4_API_SECRET があれば Cloud Run に渡す。
+# シークレットはリポジトリに書かない。なければ GA4 には送らず、Cloud Logging だけに記録する。
+GA4_ENV=""
+if [[ -n "${GA4_MEASUREMENT_ID:-}" && -n "${GA4_API_SECRET:-}" ]]; then
+  GA4_ENV="@GA4_MEASUREMENT_ID=${GA4_MEASUREMENT_ID}@GA4_API_SECRET=${GA4_API_SECRET}"
+else
+  echo "GA4_MEASUREMENT_ID と GA4_API_SECRET がないので、GA4 には送らない設定でデプロイします"
+fi
 
 # 1) ビルド（2026-10-14 の初回デプロイで踏んだ権限の罠を避ける形）
 #    - `gcloud run deploy --source` は既定バケットの持ち主を確かめられないと別名のバケットを作ろうとして失敗する
@@ -61,7 +70,7 @@ echo "ビルド完了: ${IMAGE}"
 gcloud run deploy "$SERVICE" --project "$PROJECT" --region "$REGION" --image "$IMAGE" \
   --service-account "$SA" --allow-unauthenticated --ingress all \
   --memory 512Mi --cpu 1 --min-instances 0 --max-instances 2 --concurrency 40 --timeout 30 \
-  --set-env-vars "^@^HBF_MCP_PATH=/mcp/home-buying@HBF_RATE_PER_MIN=60@HBF_TRUSTED_PROXY_HOPS=2@HBF_TRUST_FORWARDED_HOST=1@HBF_PROXY_RATE_PER_MIN=600@HBF_DEBUG_FORWARDING=${DEBUG_FORWARDING}@HBF_ALLOWED_HOSTS=${HOSTS}"
+  --set-env-vars "^@^HBF_MCP_PATH=/mcp/home-buying@HBF_RATE_PER_MIN=60@HBF_TRUSTED_PROXY_HOPS=2@HBF_TRUST_FORWARDED_HOST=1@HBF_PROXY_RATE_PER_MIN=600@HBF_DEBUG_FORWARDING=${DEBUG_FORWARDING}@HBF_ALLOWED_HOSTS=${HOSTS}${GA4_ENV}"
 
 # 許可するのは terass.house 系のホストだけにし、Cloud Run の *.run.app への直接アクセスは受け付けない（421）。
 # すべての利用が Firebase Hosting 経由になるので、回数制限の接続元（X-Forwarded-For の末尾から2番目）を一意に決められる。
