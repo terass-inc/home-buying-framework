@@ -1,12 +1,13 @@
 name: monthly review
 
 # 数値前提（assumptions.yaml）の毎月の見直し。
-# 毎月2日 00:00 UTC（日本時間 9:00）に、Claude の Web 検索で最新の金利・税制・補助金を調べ、
+# 毎月2日 00:00 UTC（日本時間 9:00）に、Claude Code（claude -p）の Web 検索で最新の金利・税制・補助金を調べ、
 # market_rates（実勢金利の目安）を書き換えた Pull Request を作る。税制などの判断が要る項目は本文に出典つきで並べる。
 # フラット35の金利は毎月1営業日目に公表されるので、その翌日に動かす。
 #
 # 必要な設定:
-# - リポジトリの Secrets に ANTHROPIC_API_KEY（なければ何もせず終わる。review-reminder の Issue だけで運用する）
+# - リポジトリの Secrets に CLAUDE_CODE_OAUTH_TOKEN（`claude setup-token` で発行。Claude のプランの枠で動く）
+#   なければ何もせず終わる。review-reminder の Issue だけで運用する
 # - Settings → Actions → General → 「Allow GitHub Actions to create and approve pull requests」を有効にする
 # GITHUB_TOKEN で作った Pull Request では他のワークフローが動かないため、CI と同じ検査をここで先に通す。
 on:
@@ -29,13 +30,13 @@ jobs:
     timeout-minutes: 30
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
     steps:
-      - name: API キーがなければ終わる
+      - name: トークンがなければ終わる
         id: key
         run: |
-          if [ -z "$ANTHROPIC_API_KEY" ]; then
-            echo "ANTHROPIC_API_KEY が未設定のため、自動の見直しは行わない（review-reminder の Issue で運用する）"
+          if [ -z "$CLAUDE_CODE_OAUTH_TOKEN" ]; then
+            echo "CLAUDE_CODE_OAUTH_TOKEN が未設定のため、自動の見直しは行わない（review-reminder の Issue で運用する）"
             echo "skip=1" >> "$GITHUB_OUTPUT"
           fi
 
@@ -47,10 +48,16 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Claude で最新値を調べ、market_rates を書き換える
+      - uses: actions/setup-node@v5
+        if: steps.key.outputs.skip != '1'
+        with:
+          node-version: "22"
+
+      - name: Claude Code で最新値を調べ、market_rates を書き換える
         if: steps.key.outputs.skip != '1'
         run: |
-          pip install -r scripts/eval/requirements.txt pyyaml==6.0.2 "mcp>=2,<3"
+          npm install -g @anthropic-ai/claude-code@2.1.312
+          pip install pyyaml==6.0.2 "mcp>=2,<3"
           python3 scripts/monthly_review.py --report /tmp/review.md
           python3 scripts/build_lite.py
 

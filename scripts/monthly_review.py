@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """数値前提（assumptions.yaml）の毎月の見直し。GitHub Actions（.github/workflows/monthly-review.yml）から月1回動かす。
 
-Claude に Web 検索で最新値を調べさせ、次の2つを行う。
+Claude Code（claude -p）に Web 検索で最新値を調べさせ、次の2つを行う。
 1. market_rates（実勢金利の目安）は自動で書き換える。値が一次情報の数字そのもので、判断が要らないため
 2. それ以外の「見直し要」の項目（税制・補助金・審査金利・シナリオ金利など）は書き換えず、
    出典つきの確認結果をレポート（Markdown）にして、Pull Request の本文に載せる。人が読んで直す
@@ -11,7 +11,7 @@ Claude に Web 検索で最新値を調べさせ、次の2つを行う。
 使い方:
     python3 scripts/monthly_review.py --report review.md          # 調べて書き換え、レポートを書く
     python3 scripts/monthly_review.py --from-json result.json ...  # 調べ済みの JSON から書き換える（試験用）
-依存: anthropic（--from-json のときは不要）
+依存: Claude Code の CLI（`claude`）。--from-json のときは不要
 """
 from __future__ import annotations
 
@@ -19,12 +19,14 @@ import argparse
 import datetime
 import json
 import re
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 ASSUMPTIONS = ROOT / "assumptions.yaml"
-MODEL = "claude-opus-5-5"
+MODEL = "claude-opus-5-5"  # claude -p --model に渡す
 
 # 自動で書き換える market_rates のキーと、受け取る値の範囲（範囲外は採用しない）
 RATE_KEYS = {
@@ -47,6 +49,7 @@ CHECK_ITEMS = [
 PROMPT = """あなたは日本の住宅ローン・住宅税制の調査担当です。今日は {today} です。
 Web 検索で一次情報（住宅金融支援機構、日本銀行、財務省、国土交通省、各銀行の公式発表）を優先して、次を調べてください。
 推測で数字を埋めないこと。確認できなかった値は null にし、note に理由を書いてください。
+sources には公的機関・住宅金融支援機構・銀行の公式ページと大手報道を使い、個人のブログやまとめサイトは使わないでください。
 
 ## A. 実勢金利（数値で答える）
 - flat35_most_common_pct: フラット35（返済期間21〜35年・融資率9割以下）の最頻金利。今月適用分（未発表なら先月分と明記）
@@ -94,30 +97,25 @@ def build_prompt(yaml_text: str, today: str) -> str:
 
 
 def ask_claude(prompt: str) -> str:
-    """Web 検索つきで調べさせ、最後のテキストを返す。サーバー側の検索が長引くと pause_turn で止まるので続きを頼む。"""
-    import anthropic  # 遅延 import（--from-json と単体テストでは SDK 不要）
+    """Claude Code（`claude -p`）に Web 検索だけを許して調べさせ、最後の回答の文章を返す。
 
-    client = anthropic.Anthropic()
-    messages = [{"role": "user", "content": prompt}]
-    for _ in range(5):
-        with client.beta.messages.stream(
-            model=MODEL,
-            max_tokens=32000,
-            output_config={"effort": "high"},
-            tools=[{"type": "web_search_20260209", "name": "web_search", "max_uses": 20,
-                    "user_location": {"type": "approximate", "country": "JP", "timezone": "Asia/Tokyo"}}],
-            betas=["server-side-fallback-2026-07-01"],
-            fallbacks="default",  # 安全分類で断られたときは別のモデルで続ける
-            messages=messages,
-        ) as stream:
-            resp = stream.get_final_message()
-        if resp.stop_reason == "pause_turn":
-            messages = [*messages, {"role": "assistant", "content": resp.content}]
-            continue
-        if resp.stop_reason == "refusal":
-            sys.exit(f"Claude が回答を断りました: {resp.stop_details}")
-        return "".join(b.text for b in resp.content if b.type == "text")
-    sys.exit("検索が終わりませんでした（pause_turn が5回続いた）")
+    認証は Claude Code と同じ。GitHub Actions では Secrets の CLAUDE_CODE_OAUTH_TOKEN（`claude setup-token` で発行）を使う。
+    使える道具は WebSearch と WebFetch だけにする（ファイルの書き換えやコマンドの実行はさせない。書き換えはこのスクリプトが行う）。
+    リポジトリの CLAUDE.md（住宅相談の指示書）を読ませないよう、空の作業フォルダで動かす。
+    """
+    tools = "WebSearch,WebFetch"
+    with tempfile.TemporaryDirectory() as cwd:
+        proc = subprocess.run(
+            ["claude", "-p", "--model", MODEL, "--tools", tools, "--allowedTools", tools,
+             "--output-format", "json", "--no-session-persistence", "--strict-mcp-config"],
+            input=prompt, capture_output=True, text=True, cwd=cwd, timeout=1500,
+        )
+    if proc.returncode != 0:
+        sys.exit(f"claude -p が失敗しました（終了コード {proc.returncode}）: {proc.stderr[-1000:]}")
+    out = json.loads(proc.stdout)
+    if out.get("is_error"):
+        sys.exit(f"claude -p がエラーを返しました: {str(out.get('result'))[:1000]}")
+    return out.get("result") or ""
 
 
 def extract_json(text: str) -> dict:
@@ -162,8 +160,9 @@ def _set_list(text: str, key: str, values: list[str]) -> str:
         return text
     indent = m.group(1)
     new = f"{indent}{key}:\n" + "".join(f"{indent}  - {json.dumps(v, ensure_ascii=False)}\n" for v in values)
-    block = (block + "\n")[:m.start()] + new + (block + "\n")[m.end():]
-    return head + sep + block.rstrip("\n") + tail
+    padded = block + "\n"
+    block = padded[:m.start()] + new + padded[m.end():]
+    return head + sep + block[:-1] + tail  # 足した改行を1つだけ戻す（後ろの空行は残す）
 
 
 def apply_market_rates(text: str, result: dict, today: str) -> tuple[str, list[str]]:

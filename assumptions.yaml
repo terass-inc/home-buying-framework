@@ -14,13 +14,15 @@ interest_rate:
 market_rates:                        # 回答時点の実勢金利の目安。must_show_two_rates の「実勢金利」に使う。毎月 scripts/monthly_review.py が更新する
   as_of: 2026-10-28                  # この欄を確認した日
   flat35_most_common_pct: 3.83       # フラット35（返済期間21〜35年・融資率9割以下）の最頻金利。2026年10月適用分
-  variable_major_bank_min_pct: "1.2〜1.3"   # 大手銀行の変動金利の最低水準（優遇後）。銀行と審査で変わる
+  variable_major_bank_min_pct: "1.2〜1.5"   # 大手銀行の変動金利の最低水準（優遇後）。銀行と審査で変わる
   boj_policy_rate_pct: 1.25          # 日本銀行の政策金利（2026年9月の会合で引き上げ）
-  note: "大手行の短期プライムレートが2026年11月に0.25%上がるため、変動金利はその後の基準日から上がる見込み。固定金利は scenarios の high（2.5%）を上回っているので、high より高い実勢金利も並べて示す。回答時は最新値を確認すること（見直し要）"
+  note: "大手行の短期プライムレートが2026年11月（三菱UFJ・りそなは11/2、三井住友は11/9）に0.25%上がり2.625%になるため、新規の変動金利は12月以降に上がる見込み。借入中の人の返済額に反映されるのは2027年以降。日銀は10/29〜30の会合で据え置きの予想が大勢で、次の利上げは12月とみる声が多い。固定金利（フラット35は3.83%、大手行の10年固定は3.6〜4.0%）は変動との差が2%以上ある。（見直し要）"
   sources:
     - "https://www.flat35.com/"
-    - "https://kakaku.com/housing-loan/rate/"
-    - "https://www.boj.or.jp/mopo/mpmdeci/index.htm"
+    - "https://mercury-realestate.co.jp/article/news/news-flat35-202610/"
+    - "https://www.bk.mufg.jp/kariru/jutaku/yuuguu/index.html"
+    - "https://mogecheck.jp/articles/show/51rzNy7XEJ5o4mQ6ZkVv"
+    - "https://www.nikkei.com/article/DGKKZO99036980Q6A930C2EE9000/"
 
 inflation:                           # 計算はすべて名目で行い、金利・賃料・保有コスト・物件価格を同じ世界観でそろえるために使う
   simulation_default_pct: 1.0        # 標準の物価上昇率（年率）

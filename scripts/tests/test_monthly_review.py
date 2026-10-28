@@ -39,6 +39,7 @@ class TestMonthlyReview(unittest.TestCase):
             if k not in ("market_rates", "updated_at"):
                 self.assertEqual(d[k], old[k], k)
         self.assertIn("# フラット35（返済期間21〜35年", new)  # コメントは残す
+        self.assertEqual(new.count("\n\n"), TEXT.count("\n\n"))  # 区切りの空行も消さない
 
     def test_rejects_out_of_range_and_missing_values(self):
         bad = {"market_rates": {"flat35_most_common_pct": 38.3, "variable_major_bank_min_pct": None,
