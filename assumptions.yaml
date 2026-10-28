@@ -1,7 +1,7 @@
 # 数値前提（AIが計算・比較に使うデフォルト値）
 # 標準のシミュレーション前提を、2026年時点で見直したもの。
 # 「見直し要」の項目は、回答時に最新値を利用者に確認するか、Web検索で更新すること。
-updated_at: 2026-09-17
+updated_at: 2026-10-28
 
 interest_rate:
   simulation_default_pct: 1.0        # 基本の前提（物価一定・金利1.0%）。単独で使わず、必ず実勢金利との2本立てで示す
@@ -10,6 +10,17 @@ interest_rate:
   scenario_link: "金利を動かすときは inflation.scenarios のセットで動かす。金利だけ上げて賃料・物価・物件価格を据え置くのは整合しない前提"
   screening_rate_pct: 3.0            # 審査金利。銀行が返済比率を計算するときに用いる仮の金利（3〜4%が一般的）
   screening_rate_note: "見直し要。銀行ごとに異なる"
+
+market_rates:                        # 回答時点の実勢金利の目安。must_show_two_rates の「実勢金利」に使う。毎月 scripts/monthly_review.py が更新する
+  as_of: 2026-10-28                  # この欄を確認した日
+  flat35_most_common_pct: 3.83       # フラット35（返済期間21〜35年・融資率9割以下）の最頻金利。2026年10月適用分
+  variable_major_bank_min_pct: "1.2〜1.3"   # 大手銀行の変動金利の最低水準（優遇後）。銀行と審査で変わる
+  boj_policy_rate_pct: 1.25          # 日本銀行の政策金利（2026年9月の会合で引き上げ）
+  note: "大手行の短期プライムレートが2026年11月に0.25%上がるため、変動金利はその後の基準日から上がる見込み。固定金利は scenarios の high（2.5%）を上回っているので、high より高い実勢金利も並べて示す。回答時は最新値を確認すること（見直し要）"
+  sources:
+    - "https://www.flat35.com/"
+    - "https://kakaku.com/housing-loan/rate/"
+    - "https://www.boj.or.jp/mopo/mpmdeci/index.htm"
 
 inflation:                           # 計算はすべて名目で行い、金利・賃料・保有コスト・物件価格を同じ世界観でそろえるために使う
   simulation_default_pct: 1.0        # 標準の物価上昇率（年率）
@@ -156,7 +167,7 @@ holding:
   historical_max_drop_pct: 6.3       # 首都圏中古マンション、リーマンショック時（2008年5月→2009年4月）
 
 tax_and_programs:                    # 制度は年度ごとに変わる。回答時に必ず最新値を確認する（見直し要）
-  checked_at: 2026-09-17             # 下記の内容を確認した日
+  checked_at: 2026-10-28             # 下記の内容を確認した日
   stance: "控除・補助は『原則として使える前提』で案内し、使えなくなる条件を並べて、適用の確定は税理士・金融機関・自治体への相談に回す。『使えます』とも『使えません』とも断定しない"
 
   mortgage_deduction:                # 住宅ローン控除（2026年＝令和8年入居の制度。租税特別措置法第41条）
@@ -199,7 +210,8 @@ tax_and_programs:                    # 制度は年度ごとに変わる。回�
   gift_tax_exemption:                # 住宅取得等資金に係る贈与税の非課税措置
     limit_man_yen: {quality_housing: 1000, other: 500}   # 質の高い住宅1,000万円、それ以外500万円（単位 万円）
     basic_deduction_man_yen: 110     # 暦年課税の基礎控除。合わせて最大1,110万円
-    deadline: "2026年12月31日までの贈与（延長されるかは未確定。年内の贈与を検討している人には期限が近いことを伝える）"
+    deadline: "2026年12月31日までの贈与（延長されるかは未確定。国土交通省の令和9年度税制改正要望には含まれているが、決まるのは2026年12月の税制改正大綱。年内の贈与を検討している人には期限が近いことを伝える）"
+    deadline_source: "https://www.mof.go.jp/tax_policy/tax_reform/outline/fy2027/request/mlit/09y_mlit_k_25.pdf"
     donor: "直系尊属（父母・祖父母）からの贈与"
     note: "見直し要。適用には申告が必要で、要件の確定は税理士・税務署へ"
 
