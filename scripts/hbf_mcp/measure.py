@@ -8,6 +8,7 @@
    任意の URL には転送しない（オープンリダイレクトにしない）。
 
 ログは1回につき1行の JSON（event・行き先・媒体・AI の種類・User-Agent）。IP アドレスは残さない。
+同じ記録を GA4 にもイベントとして送る（ga4.py。User-Agent は送らない）。
 """
 from __future__ import annotations
 
@@ -18,6 +19,7 @@ import urllib.parse
 from pathlib import Path
 from typing import Optional
 
+import ga4
 from paths import ROOT
 
 PUBLIC_BASE = os.environ.get("HBF_PUBLIC_BASE", "https://terass.house").rstrip("/")
@@ -89,6 +91,7 @@ def destination(target: str, src: str) -> Optional[str]:
 
 def _log(event: str, **fields) -> None:
     print(json.dumps({"event": event, **fields}, ensure_ascii=False), flush=True)
+    ga4.send(event, **{k: v for k, v in fields.items() if k != "user_agent"})
 
 
 _lite_cache: Optional[bytes] = None

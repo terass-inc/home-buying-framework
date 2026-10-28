@@ -94,6 +94,20 @@ self_check(topic=rent_vs_buy, shows_numbers=true)
 
 例：note の記事に `https://terass.house/go/home-buying/chatgpt?src=note` を置くと、クリック数と、その後 ChatGPT が前提を読みに来た回数（`src=chatgpt-note`）の両方が取れます。集計は `usage_report.py` で出します。
 
+### GA4 でも見る
+
+同じ記録を GA4 にもイベントとして送ります（`ga4.py`、Measurement Protocol）。AI が前提を読みに来るときはブラウザを通らないため、GTM では数えられないからです。
+
+| GA4 のイベント名 | いつ | パラメータ |
+|---|---|---|
+| `hbf_fetch` | AI が前提の本文・原則を読みに来た | `doc`・`agent`・`src` |
+| `hbf_click` | 計測用リンクが押された | `target`・`src`・`agent` |
+| `hbf_mcp_tool` | MCP の道具が呼ばれた | `tool`・`client`・`ok` |
+
+- デプロイ時に手元の環境変数 `GA4_MEASUREMENT_ID`（G-…）と `GA4_API_SECRET` を設定しておくと、`deploy.sh` が Cloud Run に渡します。どちらかがなければ送りません。
+- IP アドレス・User-Agent・相談の中身は送りません。`client_id` は毎回ランダムなので、GA4 では「ユーザー数」ではなく「イベント数」で見てください。
+- パラメータでの絞り込みには、GA4 の管理画面でカスタムディメンション（イベント スコープ）として `src`・`agent`・`doc`・`target`・`tool`・`client` を登録します。
+
 ## テスト
 
 ```bash

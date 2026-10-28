@@ -28,6 +28,7 @@ from mcp.types import ToolAnnotations  # noqa: E402
 from pydantic import BaseModel, Field  # noqa: E402
 
 import consult  # noqa: E402
+import ga4  # noqa: E402
 import report  # noqa: E402
 from paths import ROOT  # noqa: E402
 from report import DISCLAIMER, advice, inputs_from_assumptions, load_assumptions, simulate  # noqa: E402
@@ -54,7 +55,7 @@ async def usage_log(ctx, call_next):
     """計測用のログ。1回の呼び出しにつき1行の JSON を標準出力へ出す（Cloud Logging がそのまま集計できる形）。
 
     記録するのは、メソッド・道具の名前・AIアプリの名前・User-Agent・成否・処理時間だけ。
-    相談の中身（引数の値、consultation_id）は記録しない。
+    相談の中身（引数の値、consultation_id）は記録しない。道具の呼び出しは GA4 にも送る（ga4.py）。
     """
     import time
     t0, ok = time.perf_counter(), True
@@ -84,6 +85,8 @@ async def usage_log(ctx, call_next):
                 "client": client, "user_agent": headers.get("user-agent"),
                 "ok": ok, "ms": round((time.perf_counter() - t0) * 1000),
             }, ensure_ascii=False), flush=True)
+            if method == "tools/call":  # GA4 には道具の呼び出しだけ送る（初期化や一覧の取得は数えない）
+                ga4.send("hbf_mcp_tool", tool=params.get("name"), client=client, ok=str(ok).lower())
 
 
 # ---- 入力の範囲（公開サーバーなので、現実にありえない値で計算させない） --------------------------
