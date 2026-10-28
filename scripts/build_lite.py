@@ -34,6 +34,8 @@ STEPS = [
 
 LITE_ASSUMPTIONS = [
     ("interest_rate", "simulation_default_pct", "標準金利（基本の前提。実勢金利との2本立てで示す。見直し要）", "%"),
+    ("market_rates", "flat35_most_common_pct", "実勢金利の目安：フラット35の最頻金利（{as_of} 時点。回答時に最新値を確認）", "%"),
+    ("market_rates", "variable_major_bank_min_pct", "実勢金利の目安：大手銀行の変動金利の最低水準（{as_of} 時点）", "%"),
     ("inflation", "simulation_default_pct", "標準の物価上昇率（年。金利・賃料・保有コストとセットで動かす）", "%"),
     ("inflation", "price_pass_through_pct", "物価上昇が物件価格に波及する割合（波及しない場合も必ず並べる）", "%"),
     ("purchase_costs", "simulation_default_pct", "購入諸費用（物件価格に対する率）", "%"),
@@ -90,6 +92,8 @@ def assumptions_updated_at() -> str:
 def assumptions_digest() -> str:
     t = read(ROOT / "assumptions.yaml")
     rows = [f"数値前提（{assumptions_updated_at()} 時点。金利・税制は必ず最新値を確認）"]
+    as_of_m = re.search(r"^market_rates:[^\n]*\n(?:[ \t]+.*\n)*?[ \t]+as_of:\s*(\S+)", t, re.M)
+    as_of = as_of_m.group(1) if as_of_m else "不明"  # market_rates の確認日。ラベルの {as_of} に入れる
     for section, key, label, unit in LITE_ASSUMPTIONS:
         m = re.search(rf"^{section}:[^\n]*\n((?:(?:[ \t]+.*)?\n)+)", t, re.M)
         if not m:
@@ -103,7 +107,7 @@ def assumptions_digest() -> str:
                     val = f"{int(num):,}"
             except ValueError:
                 pass
-            rows.append(f"- {label}: {val}{unit}")
+            rows.append(f"- {label.format(as_of=as_of)}: {val}{unit}")
     return "\n".join(rows)
 
 

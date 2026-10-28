@@ -7,7 +7,7 @@
 2. 値の型と範囲。名前が `_pct` で終わる数値は -100〜100、`_yen` で終わる数値は 0 以上
 3. scripts/build_lite.py がライト版に取り込むキー（LITE_ASSUMPTIONS）が実在すること。
    build_lite.py は見つからないキーを黙って飛ばすので、ここで検出する
-4. updated_at の鮮度。90日を超えたら警告、180日を超えたら失敗
+4. updated_at の鮮度。毎月見直すので、40日を超えたら警告、100日を超えたら失敗
 
 使い方: python3 scripts/check_assumptions.py [--today YYYY-MM-DD]
 依存: PyYAML
@@ -23,7 +23,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 DOC_GLOBS = ["AGENTS.md", "principles/*.md", "calc/*.md", "cases/*.md"]
 REF = re.compile(r"`([a-z_]+(?:\.[a-z0-9_]+)+)`")
-WARN_DAYS, FAIL_DAYS = 90, 180
+WARN_DAYS, FAIL_DAYS = 40, 100
 
 errors: list[str] = []
 warnings: list[str] = []

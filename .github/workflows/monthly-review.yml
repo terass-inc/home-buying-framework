@@ -1,0 +1,91 @@
+name: monthly review
+
+# 数値前提（assumptions.yaml）の毎月の見直し。
+# 毎月2日 00:00 UTC（日本時間 9:00）に、Claude Code（claude -p）の Web 検索で最新の金利・税制・補助金を調べ、
+# market_rates（実勢金利の目安）を書き換えた Pull Request を作る。税制などの判断が要る項目は本文に出典つきで並べる。
+# フラット35の金利は毎月1営業日目に公表されるので、その翌日に動かす。
+#
+# 必要な設定:
+# - リポジトリの Secrets に CLAUDE_CODE_OAUTH_TOKEN（`claude setup-token` で発行。Claude のプランの枠で動く）
+#   なければ何もせず終わる。review-reminder の Issue だけで運用する
+# - Settings → Actions → General → 「Allow GitHub Actions to create and approve pull requests」を有効にする
+# GITHUB_TOKEN で作った Pull Request では他のワークフローが動かないため、CI と同じ検査をここで先に通す。
+on:
+  schedule:
+    - cron: "0 0 2 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: monthly-review
+  cancel-in-progress: false
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+    steps:
+      - name: トークンがなければ終わる
+        id: key
+        run: |
+          if [ -z "$CLAUDE_CODE_OAUTH_TOKEN" ]; then
+            echo "CLAUDE_CODE_OAUTH_TOKEN が未設定のため、自動の見直しは行わない（review-reminder の Issue で運用する）"
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        if: steps.key.outputs.skip != '1'
+
+      - uses: actions/setup-python@v7
+        if: steps.key.outputs.skip != '1'
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v5
+        if: steps.key.outputs.skip != '1'
+        with:
+          node-version: "22"
+
+      - name: Claude Code で最新値を調べ、market_rates を書き換える
+        if: steps.key.outputs.skip != '1'
+        run: |
+          npm install -g @anthropic-ai/claude-code@2.1.312
+          pip install pyyaml==6.0.2 "mcp>=2,<3"
+          python3 scripts/monthly_review.py --report /tmp/review.md
+          python3 scripts/build_lite.py
+
+      - name: CI と同じ検査を通す
+        if: steps.key.outputs.skip != '1'
+        run: |
+          python3 scripts/check_assumptions.py
+          python3 -m unittest discover -s scripts/tests
+
+      - name: Pull Request を作る
+        if: steps.key.outputs.skip != '1'
+        run: |
+          month=$(date -u +%Y-%m)
+          branch="monthly-review/${month}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add assumptions.yaml dist/lite.md README.md docs/llms.txt docs/llms-full.txt
+          if git diff --cached --quiet; then
+            echo "書き換えなし。レポートだけ Issue に残す"
+            num=$(gh issue list --label review-reminder --state open --json number --jq '.[0].number')
+            [ -n "$num" ] && gh issue comment "$num" --body-file /tmp/review.md
+            exit 0
+          fi
+          git commit -m "数値前提の毎月の見直し（${month}）"
+          git push -f origin "$branch"
+          if gh pr view "$branch" >/dev/null 2>&1; then
+            gh pr edit "$branch" --body-file /tmp/review.md
+          else
+            gh pr create --base main --head "$branch" --title "数値前提の毎月の見直し（${month}）" --body-file /tmp/review.md
+          fi

@@ -1,11 +1,11 @@
 name: review reminder
 
 # 数値前提（金利・税制・補助金・賃料指数など）の定期見直しを促す Issue を立てる。
-# 3カ月ごと（1月・4月・7月・10月の1日 00:00 UTC ＝ 日本時間 9:00）に実行する。
+# 毎月1日 00:00 UTC（日本時間 9:00）に実行する。翌日に monthly-review.yml が Claude で調べた結果の Pull Request を作る。
 # 本文は .github/review-checklist.md にある。
 on:
   schedule:
-    - cron: "0 0 1 */3 *"
+    - cron: "0 0 1 * *"
   workflow_dispatch:
 
 permissions:
