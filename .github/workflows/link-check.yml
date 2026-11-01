@@ -14,7 +14,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Check raw.githubusercontent.com / github.io URLs
         run: |
           urls=$(grep -rhoE "https://(raw\.githubusercontent\.com/terass-inc/home-buying-framework|terass-inc\.github\.io/home-buying-framework)/[^ )\"'<>]*" README.md docs | sort -u)
