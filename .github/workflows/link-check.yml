@@ -4,7 +4,7 @@ name: link check
 on:
   push:
     branches: [main]
-    paths: [README.md, "docs/**", ".github/workflows/link-check.yml"]
+    paths: [README.md, "docs/**", "selling/**", "assumptions.yaml", ".github/workflows/link-check.yml"]
   schedule:
     - cron: "0 0 * * 1"   # 毎週月曜 9:00（日本時間）
   workflow_dispatch:
@@ -24,5 +24,25 @@ jobs:
             code=$(curl -sfL -o /dev/null -w '%{http_code}' --retry 3 --retry-delay 60 --retry-all-errors "$u" || true)
             echo "$code $u"
             [ "$code" = "200" ] || fail=1
+          done
+          exit $fail
+
+  external:
+    # 売却版の出典（国税庁・e-Gov・国土交通省など）が 404 になっていないかを確かめる。
+    # 外部サイトは GitHub のサーバーからのアクセスを一時的に拒むことがあるので、404 と 410 だけを失敗にする
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check source URLs in selling/ and assumptions.yaml
+        run: |
+          urls=$(grep -rhoE "https://[^ )\"'<>]*" selling assumptions.yaml | grep -vE "terass-inc\.github\.io|raw\.githubusercontent\.com" | sort -u)
+          fail=0
+          for u in $urls; do
+            code=$(curl -sL -o /dev/null -w '%{http_code}' -A "Mozilla/5.0" --max-time 30 --retry 2 "$u" || true)
+            final=$(curl -sL -o /dev/null -w '%{url_effective}' -A "Mozilla/5.0" --max-time 30 "$u" || true)
+            echo "$code $u"
+            case "$code" in 404|410) fail=1 ;; esac
+            # 国税庁は存在しないページを 404 ページへ転送して 200 を返す
+            case "$final" in *404*|*notfound*|*not_found*) echo "  -> $final"; fail=1 ;; esac
           done
           exit $fail
