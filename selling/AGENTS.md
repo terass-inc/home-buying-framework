@@ -51,10 +51,13 @@
 | ステップ | 話題 | ファイル |
 | --- | --- | --- |
 | ①売る理由と期限 | なぜ売るのか・期限・売らない選択肢 | `selling/principles/00-why-sell.md` |
+| ①売る理由と期限 | 住み替えの順番（売り先行か買い先行か） | `selling/principles/01-trade-up.md` |
 | ②手残りの試算 | 残債・売却諸費用・譲渡所得税と特例 | `selling/principles/02-net-proceeds.md` |
+| ②手残りの試算 | 金利と市況・今が売り時か・待てば上がるか | `selling/principles/03-rates-and-market.md` |
 | ③売り方 | 査定の読み方・査定額と成約価格の差 | `selling/principles/04-valuation.md` |
+| ③売り方 | 仲介か買取か・媒介契約の種類・囲い込み | `selling/principles/05-broker-or-buyout.md` |
 
-住み替えの順番、金利と市況のシナリオ、仲介か買取か・媒介契約、価格設定、契約と引き渡しは、これから追加する。それまでは上の5つのルールに従って答える。
+価格設定、契約と引き渡しは、これから追加する。それまでは上の5つのルールに従って答える。
 
 ## 回答の検証
 
