@@ -5,6 +5,8 @@ on:
   push:
     branches: [main]
     paths: [README.md, "docs/**", "selling/**", "assumptions.yaml", ".github/workflows/link-check.yml"]
+  pull_request:
+    paths: ["selling/**", "assumptions.yaml", ".github/workflows/link-check.yml"]
   schedule:
     - cron: "0 0 * * 1"   # 毎週月曜 9:00（日本時間）
   workflow_dispatch:
@@ -29,20 +31,29 @@ jobs:
 
   external:
     # 売却版の出典（国税庁・e-Gov・国土交通省など）が 404 になっていないかを確かめる。
-    # 外部サイトは GitHub のサーバーからのアクセスを一時的に拒むことがあるので、404 と 410 だけを失敗にする
+    # 外部サイトは GitHub のサーバーからのアクセスを一時的に拒むことがあるので、404 と 410 だけを失敗にする。
+    # 検出できないもの：e-Gov は存在しない法令IDにも 200、レインズは存在しないページに 403 を返す。
+    # ページの中身が別物に変わった場合も分からないので、出典を足したときは題名を目で確かめる
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - name: Check source URLs in selling/ and assumptions.yaml
         run: |
-          urls=$(grep -rhoE "https://[^ )\"'<>]*" selling assumptions.yaml | grep -vE "terass-inc\.github\.io|raw\.githubusercontent\.com" | sort -u)
+          # 全角のかっこなどを拾わないよう、URL に使える ASCII 文字だけを拾い、末尾の句読点を外す
+          urls=$(grep -rhoE "https://[A-Za-z0-9._~:/?#@!\$&*+,;=%-]+" selling assumptions.yaml \
+            | sed -E 's/[.,;:]+$//' \
+            | grep -vE "terass-inc\.github\.io|raw\.githubusercontent\.com" | sort -u)
           fail=0
           for u in $urls; do
-            code=$(curl -sL -o /dev/null -w '%{http_code}' -A "Mozilla/5.0" --max-time 30 --retry 2 "$u" || true)
-            final=$(curl -sL -o /dev/null -w '%{url_effective}' -A "Mozilla/5.0" --max-time 30 "$u" || true)
+            read -r code final < <(curl -sL -o /dev/null -w '%{http_code} %{url_effective}' -A "Mozilla/5.0" --max-time 30 --retry 2 "$u" || true)
             echo "$code $u"
-            case "$code" in 404|410) fail=1 ;; esac
-            # 国税庁は存在しないページを 404 ページへ転送して 200 を返す
-            case "$final" in *404*|*notfound*|*not_found*) echo "  -> $final"; fail=1 ;; esac
+            case "$code" in
+              404|410) fail=1 ;;
+              000) echo "  ::warning::接続できませんでした（ドメイン名の解決やタイムアウト）: $u" ;;
+            esac
+            # 国税庁は存在しないページを 404 ページへ転送して 200 を返すので、転送されたときだけ転送先を見る
+            if [ "$final" != "$u" ]; then
+              case "$final" in */error/*|*/404*|*notfound*|*not_found*) echo "  -> $final"; fail=1 ;; esac
+            fi
           done
           exit $fail

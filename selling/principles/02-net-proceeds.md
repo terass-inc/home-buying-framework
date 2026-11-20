@@ -16,7 +16,7 @@
 3. **残債を引く。** ここまでで「税引前の手残り」。マイナスなら、差額を現金で埋めないと売れない（抵当権を外せない）ことを示す。
 4. **税金を見積もる。** 譲渡所得 ＝ 売却価格 − 取得費（建物は減価償却後）− 譲渡費用（仲介手数料など）。
    - 所有期間が5年を超えるか（売却した年の1月1日時点。`tax_and_programs.capital_gains.long_term_threshold_years`）で税率が変わる。長期は `tax_and_programs.capital_gains.long_term_rate_pct`、短期は `tax_and_programs.capital_gains.short_term_rate_pct`。
-   - 自分が住んでいた家で、所有期間が10年を超えるなら（`tax_and_programs.capital_gains.over_10_years_threshold_years`）、課税される譲渡所得のうち6,000万円以下の部分に軽減税率（`tax_and_programs.capital_gains.over_10_years_reduced_rate_pct`）を使える。3,000万円特別控除と併用できる。
+   - 自分が住んでいた家で、所有期間が10年を超えるなら（`tax_and_programs.capital_gains.over_10_years_threshold_years`）、課税される譲渡所得のうち6,000万円以下の部分に軽減税率（`tax_and_programs.capital_gains.over_10_years_reduced_rate_pct`）を使える。3,000万円特別控除と併用できる。ただし軽減税率を使っても、新居の住宅ローン控除は受けられなくなる（`tax_and_programs.capital_gains.mortgage_deduction_conflict`）。
    - 自分が住んでいた家なら、居住用の3,000万円特別控除（`tax_and_programs.capital_gains.home_sale_special_deduction_man_yen`）を「原則として使える前提」で示し、使えなくなる条件（`tax_and_programs.capital_gains.not_applicable`）を並べる。税金が0円になっても、翌年に確定申告が要る（`tax_and_programs.capital_gains.filing_note`）。
    - 取得費が分からないと、売却価格の5%（`tax_and_programs.capital_gains.estimated_acquisition_cost_pct`）しか取得費として認められないことがある。売買契約書を探すよう促す。
 5. **税引後の手残りを、シナリオで並べる。** 成約価格の上下2つ以上と、特例を使える場合・使えない場合を並べる。1つの数字で断定しない。
