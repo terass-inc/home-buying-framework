@@ -1,7 +1,7 @@
 # 数値前提（AIが計算・比較に使うデフォルト値）
 # 標準のシミュレーション前提を、2026年時点で見直したもの。
 # 「見直し要」の項目は、回答時に最新値を利用者に確認するか、Web検索で更新すること。
-updated_at: 2026-10-28
+updated_at: 2026-11-20
 
 interest_rate:
   simulation_default_pct: 1.0        # 基本の前提（物価一定・金利1.0%）。単独で使わず、必ず実勢金利との2本立てで示す
@@ -9,20 +9,20 @@ interest_rate:
   must_show_two_rates: "基本の前提の1.0%と、回答時点の実勢金利の2本を必ず並べる。1.0%だけで示すと購入側が有利に出る（金利2.5%では分岐が後ろにずれる）"
   scenario_link: "金利を動かすときは inflation.scenarios のセットで動かす。金利だけ上げて賃料・物価・物件価格を据え置くのは整合しない前提"
   screening_rate_pct: 3.0            # 審査金利。銀行が返済比率を計算するときに用いる仮の金利（3〜4%が一般的）
-  screening_rate_note: "見直し要。銀行ごとに異なる"
+  screening_rate_note: "見直し要。銀行ごとに異なる。2026-11-20 に確認し3.0%で据え置き（大手行の店頭表示金利は3.375%。審査金利は公表しない銀行が多い）"
 
 market_rates:                        # 回答時点の実勢金利の目安。must_show_two_rates の「実勢金利」に使う。毎月 scripts/monthly_review.py が更新する
-  as_of: 2026-10-28                  # この欄を確認した日
-  flat35_most_common_pct: 3.83       # フラット35（返済期間21〜35年・融資率9割以下）の最頻金利。2026年10月適用分
+  as_of: 2026-11-20                  # この欄を確認した日
+  flat35_most_common_pct: 3.81       # フラット35（返済期間21〜35年・融資率9割以下）の最頻金利。2026年11月適用分（10月の3.83%から0.02%低下）
   variable_major_bank_min_pct: "1.2〜1.5"   # 大手銀行の変動金利の最低水準（優遇後）。銀行と審査で変わる
-  boj_policy_rate_pct: 1.25          # 日本銀行の政策金利（2026年9月の会合で引き上げ）
-  note: "大手行の短期プライムレートが2026年11月（三菱UFJ・りそなは11/2、三井住友は11/9）に0.25%上がり2.625%になるため、新規の変動金利は12月以降に上がる見込み。借入中の人の返済額に反映されるのは2027年以降。日銀は10/29〜30の会合で据え置きの予想が大勢で、次の利上げは12月とみる声が多い。固定金利（フラット35は3.83%、大手行の10年固定は3.6〜4.0%）は変動との差が2%以上ある。（見直し要）"
+  boj_policy_rate_pct: 1.25          # 日本銀行の政策金利（2026年9月の会合で引き上げ、10/29〜30の会合で据え置き）
+  note: "大手行の短期プライムレートは2026年11月（三菱UFJ・みずほは11/2、三井住友は11/9）に0.25%上がり2.625%になった。三菱UFJは12/1から新規の変動金利の基準金利を見直す（12月分は11/30に発表）ため、新規の変動金利は12月以降に上がる見込み。借入中の人の返済額に反映されるのは2027年以降。日銀は10/29〜30の会合で政策金利1.25%を据え置き、次の利上げは12月とみる声が多い。大手行の変動金利の最低水準は三菱UFJで1.195%（11月、店頭表示3.375%）。固定金利（フラット35は3.81%、三菱UFJの10年固定は3.89%）は変動との差が2%以上ある。（見直し要）"
   sources:
     - "https://www.flat35.com/"
-    - "https://mercury-realestate.co.jp/article/news/news-flat35-202610/"
+    - "https://www.simulation.jhf.go.jp/flat35/kinri/index.php/rates/top"
     - "https://www.bk.mufg.jp/kariru/jutaku/yuuguu/index.html"
-    - "https://mogecheck.jp/articles/show/51rzNy7XEJ5o4mQ6ZkVv"
-    - "https://www.nikkei.com/article/DGKKZO99036980Q6A930C2EE9000/"
+    - "https://www.bk.mufg.jp/info/hendoukinri5.html"
+    - "https://www.dir.co.jp/report/research/economics/japan/20261030_026168.html"
 
 inflation:                           # 計算はすべて名目で行い、金利・賃料・保有コスト・物件価格を同じ世界観でそろえるために使う
   simulation_default_pct: 1.0        # 標準の物価上昇率（年率）
@@ -31,7 +31,7 @@ inflation:                           # 計算はすべて名目で行い、金�
     low:    {inflation_pct: 0.0, interest_rate_pct: 1.0, rent_growth_pct: 0.0, management_fee_growth_pct: 0.0, repair_reserve_growth_pct: 2.0}
     medium: {inflation_pct: 1.0, interest_rate_pct: 1.5, rent_growth_pct: 1.0, management_fee_growth_pct: 0.5, repair_reserve_growth_pct: 3.0}
     high:   {inflation_pct: 2.0, interest_rate_pct: 2.5, rent_growth_pct: 2.0, management_fee_growth_pct: 1.0, repair_reserve_growth_pct: 4.0}
-  scenarios_note: "low は基本の前提（物価一定・金利1.0%）。medium・high の金利は実勢の水準に合わせて回答時に更新する（見直し要）"
+  scenarios_note: "low は基本の前提（物価一定・金利1.0%）。medium・high の金利は実勢の水準に合わせて回答時に更新する（見直し要）。2026-11-20 に確認し medium 1.5%・high 2.5% で据え置き（変動の実勢は1.2%前後、フラット35は3.81%）"
   price_pass_through_pct: 100        # 物価上昇が物件価格に波及する割合。標準は100%
   price_pass_through_note: "インフレ下で購入が有利に出るかを決める最大の分岐。波及率0%（物価が上がっても価格が上がらない）も必ず並べる。人口が減るエリアでは波及率は低い。エリアの優劣は断言しないが、波及率の前提が結論を左右することは必ず伝える"
   nominal_price_formula: "N年後の名目価格 = 物件価格 × (1 − 経年減価率)^N × (1 + インフレ率 × 波及率)^N"
@@ -42,6 +42,7 @@ inflation:                           # 計算はすべて名目で行い、金�
 
 loan:
   default_term_years: 35             # 通常35年、最長50年。80歳までの完済が通常。短縮は繰上返済で後から実現できる
+  default_term_note: "既定値は35年のまま。40年・50年ローンを扱う銀行が増え、40年でも金利の上乗せがない商品もある（2026-11-20確認）。その銀行で組める最長が35年を超えるなら、最長で組む原則（principles/02-loan-term.md）に沿って40年・50年も選択肢として示す。完済時の年齢と、長いほど残債の減りが遅い点を添える"
   repayment_ratio_limit_pct: 35      # 返済比率の上限（年収400万円以上の一般的な審査基準）。借りるべき額ではない
   income_multiple_lendable: "7〜8倍（最大9〜10倍）"   # 借りられる額の目安。借りるべき額ではない
   income_multiple_caution: "考えなしに年収7〜8倍を組むと将来苦しくなる水準として扱う"
@@ -114,7 +115,7 @@ rent:                                # 住み替えで賃料が変わる賃貸�
     flat_pct_per_year: 0.0           # 横ばい。過去30年の日本の平均的な姿に近い
     medium_pct_per_year: 1.0         # 標準
     high_pct_per_year: 2.0           # 都市部で賃料上昇が続く場合
-  growth_note: "見直し要。消費者物価指数の家賃は長期的にほぼ横ばいだが、2020年代の都市部の募集賃料は上昇している。回答時に最新の賃料指数・募集賃料を確認すること"
+  growth_note: "見直し要。消費者物価指数の家賃は長期的にほぼ横ばいだが、2020年代の都市部の募集賃料は上昇している。2026年10月の全国の民営家賃は前年同月比0.8%（非木造1.0%）の上昇で、総合指数（2.3%）より低い（総務省統計局 消費者物価指数 2026年10月分、https://www.stat.go.jp/data/cpi/sokuhou/tsuki/pdf/zenkoku.pdf ）。回答時に最新の賃料指数・募集賃料を確認すること"
   growth_coupling_note: "賃料の上昇と物件価格は利回りで結びついている。賃料上昇 2%/年と価格下落 大（4%/年）を同時に置くのは整合しない。賃料上昇を高く置くなら価格下落は小〜中で見る"
 
   example_moves:                     # 標準の初期値の住み替え例。金額は「今の相場」ベースで、その年の賃料には growth を別途かける。利用者の予定で上書きする
@@ -169,7 +170,7 @@ holding:
   historical_max_drop_pct: 6.3       # 首都圏中古マンション、リーマンショック時（2008年5月→2009年4月）
 
 tax_and_programs:                    # 制度は年度ごとに変わる。回答時に必ず最新値を確認する（見直し要）
-  checked_at: 2026-10-28             # 下記の内容を確認した日
+  checked_at: 2026-11-20             # 下記の内容を確認した日
   stance: "控除・補助は『原則として使える前提』で案内し、使えなくなる条件を並べて、適用の確定は税理士・金融機関・自治体への相談に回す。『使えます』とも『使えません』とも断定しない"
 
   mortgage_deduction:                # 住宅ローン控除（2026年＝令和8年入居の制度。租税特別措置法第41条）
@@ -201,18 +202,19 @@ tax_and_programs:                    # 制度は年度ごとに変わる。回�
     simulation_default_man_yen_per_year: 14   # シミュレーションの既定値。中古「その他の住宅」の限度2,000万円 × 0.7% = 14万円
     simulation_default_years: 10              # 同、10年。省エネ基準適合の証明があれば13年で再計算する
     sources:
-      - "https://www.zeitax.jp/ownersvision/2026/05/26/"
-      - "https://jitsumu-guide.com/mortgage-deduction-guide-2026/"
+      - "https://www.mlit.go.jp/jutakukentiku/house/jutakukentiku_house_tk2_000017.html"
+      - "https://www.mlit.go.jp/jutakukentiku/house/content/002011976.pdf"
+      - "https://www.mof.go.jp/tax_policy/tax_reform/outline/fy2026/20251226taikou.pdf"
 
   subsidies:                         # 補助金。予算上限に達すると年度内でも受付終了するため、必ず公式サイトで最新の受付状況を確認する
-    new_construction: "住宅省エネ2026キャンペーン「みらいエコ住宅2026事業」（国土交通省ほか3省連携）。第2期の申請期間は2026年5月13日〜12月31日（注文住宅の長期優良・ZEH水準は9月30日まで）。予算上限に達し次第終了。補助額と対象住宅の性能区分は公式サイトで確認する（https://mirai-eco2026.mlit.go.jp/）"
+    new_construction: "住宅省エネ2026キャンペーン「みらいエコ住宅2026事業」（国土交通省ほか3省連携）。第2期の申請期間は2026年5月13日〜12月31日（注文住宅のZEH水準は9月30日で終了）。交付申請の予約は2026年11月16日で受付を終了し、予約のない新規案件は12月31日までの交付申請だけになった。予算に対する申請額は2026年11月19日時点でGX志向型78%・長期優良住宅/ZEH水準51%・リフォーム16%。予算上限に達し次第終了。申請は登録事業者が行う。補助額と対象住宅の性能区分は公式サイトで確認する（https://mirai-eco2026.mlit.go.jp/）"
     local: "自治体独自の補助（新婚・子育て世帯向け、移住支援、省エネ改修など）は市区町村ごとに条件も予算も違う。『自治体の補助があるかもしれないので、市区町村の住宅課に確認を』と案内し、金額は断定しない"
     note: "見直し要。補助事業は年度で名称も要件も変わる。事業名を断定する前に公式サイトの存在を確認する"
 
   gift_tax_exemption:                # 住宅取得等資金に係る贈与税の非課税措置
     limit_man_yen: {quality_housing: 1000, other: 500}   # 質の高い住宅1,000万円、それ以外500万円（単位 万円）
     basic_deduction_man_yen: 110     # 暦年課税の基礎控除。合わせて最大1,110万円
-    deadline: "2026年12月31日までの贈与（延長されるかは未確定。国土交通省の令和9年度税制改正要望には含まれているが、決まるのは2026年12月の税制改正大綱。年内の贈与を検討している人には期限が近いことを伝える）"
+    deadline: "2026年12月31日までの贈与（2026年11月20日時点で延長は未確定。国土交通省の令和9年度税制改正要望には含まれているが、決まるのは2026年12月中旬の令和9年度税制改正大綱。延長を前提にせず、年内の贈与を検討している人には期限が近いことを伝える）"
     deadline_source: "https://www.mof.go.jp/tax_policy/tax_reform/outline/fy2027/request/mlit/09y_mlit_k_25.pdf"
     donor: "直系尊属（父母・祖父母）からの贈与"
     note: "見直し要。適用には申告が必要で、要件の確定は税理士・税務署へ"

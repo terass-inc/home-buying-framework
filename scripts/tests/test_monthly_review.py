@@ -59,7 +59,8 @@ class TestMonthlyReview(unittest.TestCase):
 
     def test_prompt_contains_current_values_and_items(self):
         p = mr.build_prompt(TEXT, "2026-11-02")
-        self.assertIn("flat35_most_common_pct: 3.83", p)
+        current = loads(TEXT)["market_rates"]["flat35_most_common_pct"]  # 毎月書き換わる値なので固定値で書かない
+        self.assertIn(f"flat35_most_common_pct: {current}", p)
         self.assertIn("tax_and_programs.gift_tax_exemption", p)
 
 
