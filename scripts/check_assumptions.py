@@ -21,7 +21,7 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
-DOC_GLOBS = ["AGENTS.md", "principles/*.md", "calc/*.md", "cases/*.md"]
+DOC_GLOBS = ["AGENTS.md", "principles/*.md", "calc/*.md", "cases/*.md", "selling/*.md", "selling/principles/*.md", "selling/cases/*.md"]
 REF = re.compile(r"`([a-z_]+(?:\.[a-z0-9_]+)+)`")
 WARN_DAYS, FAIL_DAYS = 40, 100
 

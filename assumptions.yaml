@@ -217,6 +217,25 @@ tax_and_programs:                    # 制度は年度ごとに変わる。回�
     donor: "直系尊属（父母・祖父母）からの贈与"
     note: "見直し要。適用には申告が必要で、要件の確定は税理士・税務署へ"
 
+  capital_gains:                     # 住宅を売ったときの譲渡所得税（selling/principles/02-net-proceeds.md）。見直し要
+    checked_at: 2026-11-20
+    long_term_threshold_years: 5     # 売却した年の1月1日時点で所有期間が5年を超えれば長期
+    long_term_rate_pct: 20.315       # 所得税15%・復興特別所得税0.315%・住民税5%
+    short_term_rate_pct: 39.63       # 所得税30%・復興特別所得税0.63%・住民税9%
+    home_sale_special_deduction_man_yen: 3000   # 居住用財産を譲渡した場合の3,000万円特別控除（単位 万円）
+    over_10_years_reduced_rate_pct: 14.21       # 所有10年超の居住用財産の軽減税率。課税譲渡所得6,000万円以下の部分。3,000万円特別控除と併用できる
+    over_10_years_reduced_rate_limit_man_yen: 6000
+    estimated_acquisition_cost_pct: 5           # 取得費が分からないときの概算取得費（売却価格の5%）
+    not_applicable:                  # 3,000万円特別控除を使えない主な条件。相談者に当てはまるか確認する
+      - "住まなくなってから3年目の12月31日を過ぎて売る"
+      - "配偶者・親子など特別な関係の人に売る"
+      - "前年・前々年にこの特例や、マイホームの買換え・譲渡損失の特例を使っている"
+      - "この特例を受けるためだけに入居した、一時的な住まい・別荘"
+      - "新居の住宅ローン控除と同時期に使う（入居した年とその前後の年に、この特例を使うと住宅ローン控除を受けられない）"
+    sources:
+      - "https://www.nta.go.jp/taxes/shiraberu/taxanswer/joto/3302.htm"
+      - "https://www.nta.go.jp/taxes/shiraberu/taxanswer/joto/"
+
 investment:                          # 自宅購入が合わない人の与信の使い道（principles/10-credit-and-investment.md）
   scope: "渡すのは判断の枠組みと確認事項だけ。個別物件の利回り査定、特定の不動産会社・商品・スキームの評価はしない（principles/99-out-of-scope.md）"
   stance: "「与信がもったいないから借りる」方向には押さない。投資・金融資産・本業への投資・与信を使わないの4つを同じ格で並べる"
