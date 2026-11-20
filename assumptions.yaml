@@ -9,7 +9,7 @@ interest_rate:
   must_show_two_rates: "基本の前提の1.0%と、回答時点の実勢金利の2本を必ず並べる。1.0%だけで示すと購入側が有利に出る（金利2.5%では分岐が後ろにずれる）"
   scenario_link: "金利を動かすときは inflation.scenarios のセットで動かす。金利だけ上げて賃料・物価・物件価格を据え置くのは整合しない前提"
   screening_rate_pct: 3.0            # 審査金利。銀行が返済比率を計算するときに用いる仮の金利（3〜4%が一般的）
-  screening_rate_note: "見直し要。銀行ごとに異なる"
+  screening_rate_note: "見直し要。銀行ごとに異なる。2026-11-20 に確認し3.0%で据え置き（大手行の店頭表示金利は3.375%。審査金利は公表しない銀行が多い）"
 
 market_rates:                        # 回答時点の実勢金利の目安。must_show_two_rates の「実勢金利」に使う。毎月 scripts/monthly_review.py が更新する
   as_of: 2026-11-20                  # この欄を確認した日
@@ -31,7 +31,7 @@ inflation:                           # 計算はすべて名目で行い、金�
     low:    {inflation_pct: 0.0, interest_rate_pct: 1.0, rent_growth_pct: 0.0, management_fee_growth_pct: 0.0, repair_reserve_growth_pct: 2.0}
     medium: {inflation_pct: 1.0, interest_rate_pct: 1.5, rent_growth_pct: 1.0, management_fee_growth_pct: 0.5, repair_reserve_growth_pct: 3.0}
     high:   {inflation_pct: 2.0, interest_rate_pct: 2.5, rent_growth_pct: 2.0, management_fee_growth_pct: 1.0, repair_reserve_growth_pct: 4.0}
-  scenarios_note: "low は基本の前提（物価一定・金利1.0%）。medium・high の金利は実勢の水準に合わせて回答時に更新する（見直し要）"
+  scenarios_note: "low は基本の前提（物価一定・金利1.0%）。medium・high の金利は実勢の水準に合わせて回答時に更新する（見直し要）。2026-11-20 に確認し medium 1.5%・high 2.5% で据え置き（変動の実勢は1.2%前後、フラット35は3.81%）"
   price_pass_through_pct: 100        # 物価上昇が物件価格に波及する割合。標準は100%
   price_pass_through_note: "インフレ下で購入が有利に出るかを決める最大の分岐。波及率0%（物価が上がっても価格が上がらない）も必ず並べる。人口が減るエリアでは波及率は低い。エリアの優劣は断言しないが、波及率の前提が結論を左右することは必ず伝える"
   nominal_price_formula: "N年後の名目価格 = 物件価格 × (1 − 経年減価率)^N × (1 + インフレ率 × 波及率)^N"
@@ -42,6 +42,7 @@ inflation:                           # 計算はすべて名目で行い、金�
 
 loan:
   default_term_years: 35             # 通常35年、最長50年。80歳までの完済が通常。短縮は繰上返済で後から実現できる
+  default_term_note: "既定値は35年のまま。40年・50年ローンを扱う銀行が増え、40年でも金利の上乗せがない商品もある（2026-11-20確認）。その銀行で組める最長が35年を超えるなら、最長で組む原則（principles/02-loan-term.md）に沿って40年・50年も選択肢として示す。完済時の年齢と、長いほど残債の減りが遅い点を添える"
   repayment_ratio_limit_pct: 35      # 返済比率の上限（年収400万円以上の一般的な審査基準）。借りるべき額ではない
   income_multiple_lendable: "7〜8倍（最大9〜10倍）"   # 借りられる額の目安。借りるべき額ではない
   income_multiple_caution: "考えなしに年収7〜8倍を組むと将来苦しくなる水準として扱う"
