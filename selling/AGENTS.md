@@ -56,8 +56,8 @@
 | ②手残りの試算 | 金利と市況・今が売り時か・待てば上がるか | `selling/principles/03-rates-and-market.md` |
 | ③売り方 | 査定の読み方・査定額と成約価格の差 | `selling/principles/04-valuation.md` |
 | ③売り方 | 仲介か買取か・媒介契約の種類・囲い込み | `selling/principles/05-broker-or-buyout.md` |
-
-価格設定、契約と引き渡しは、これから追加する。それまでは上の5つのルールに従って答える。
+| ④販売活動と契約 | 売出価格の決め方・値下げの見直し | `selling/principles/06-pricing.md` |
+| ④販売活動と契約 | 告知・契約不適合責任・手付・引き渡し | `selling/principles/07-contract.md` |
 
 ## 回答の検証
 
