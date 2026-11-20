@@ -45,7 +45,7 @@ jobs:
             | grep -vE "terass-inc\.github\.io|raw\.githubusercontent\.com" | sort -u)
           fail=0
           for u in $urls; do
-            read -r code final < <(curl -sL -o /dev/null -w '%{http_code} %{url_effective}' -A "Mozilla/5.0" --max-time 30 --retry 2 "$u" || true)
+            read -r code final < <(curl -sL -o /dev/null -w '%{http_code} %{url_effective}\n' -A "Mozilla/5.0" --max-time 30 --retry 2 "$u" || true)
             echo "$code $u"
             case "$code" in
               404|410) fail=1 ;;
